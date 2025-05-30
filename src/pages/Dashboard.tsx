@@ -33,6 +33,9 @@ const Dashboard = () => {
   const completedDemands = getCompletedDemands();
   const archivedEvents = 0; // Will implement later
 
+  // Ordenar eventos por data (mais recentes primeiro)
+  const sortedEvents = [...activeEvents].sort((a, b) => b.date.getTime() - a.date.getTime());
+
   const handleEventSubmit = (data: EventFormData) => {
     if (editingEvent) {
       updateEvent(editingEvent.id, {
@@ -124,7 +127,7 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {activeEvents.map((event) => (
+            {sortedEvents.map((event) => (
               <EventRow
                 key={event.id}
                 event={event}
@@ -139,7 +142,7 @@ const Dashboard = () => {
               />
             ))}
 
-            {activeEvents.length === 0 && (
+            {sortedEvents.length === 0 && (
               <div className="glass rounded-xl p-12 text-center">
                 <div className="max-w-md mx-auto">
                   <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">

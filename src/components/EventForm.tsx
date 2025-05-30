@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,39 @@ const EventForm: React.FC<EventFormProps> = ({
   const [logoPreview, setLogoPreview] = useState<string>(initialData?.logo || '');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Atualizar dados quando initialData mudar
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        date: initialData.date
+      });
+      setLogoPreview(initialData.logo || '');
+    } else {
+      setFormData({ name: '', date: new Date() });
+      setLogoPreview('');
+    }
+    setLogoFile(null);
+  }, [initialData]);
+
+  // Fechar modal ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,7 +107,7 @@ const EventForm: React.FC<EventFormProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-popup rounded-2xl p-6 w-full max-w-md animate-fade-in">
+      <div ref={modalRef} className="glass-popup rounded-2xl p-6 w-full max-w-md animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">
             {initialData ? 'Editar Evento' : 'Novo Evento'}

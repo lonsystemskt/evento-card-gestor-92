@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Settings, Archive, CheckCircle } from 'lucide-react';
+import { Archive, CheckCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
@@ -79,14 +79,6 @@ const Header = () => {
             >
               <CheckCircle size={16} />
               <span>Concluídas</span>
-            </button>
-            
-            <button className="glass-button p-2 rounded-lg hover:bg-white/20 transition-all">
-              <Settings size={20} className="text-blue-200" />
-            </button>
-            
-            <button className="glass-button p-2 rounded-lg hover:bg-white/20 transition-all">
-              <User size={20} className="text-blue-200" />
             </button>
           </div>
         </div>

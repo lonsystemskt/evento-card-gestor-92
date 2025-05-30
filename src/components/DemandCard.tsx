@@ -37,9 +37,9 @@ const DemandCard: React.FC<DemandCardProps> = ({
   const status = getStatus();
 
   return (
-    <div className="w-[230px] h-[90px] glass-card rounded-lg p-3 flex-shrink-0 relative group hover:bg-white/10 transition-all duration-200">
+    <div className="w-[230px] h-[90px] glass-card rounded-lg p-3 flex-shrink-0 relative hover:bg-white/10 transition-all duration-200">
       <div className="flex items-start justify-between h-full">
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-2">
           <div className="flex items-center space-x-2 mb-1">
             <div className={`w-2 h-2 rounded-full ${getStatusColor(status)}`}></div>
             <h4 className="text-xs font-medium text-white truncate">{demand.title}</h4>
@@ -52,7 +52,7 @@ const DemandCard: React.FC<DemandCardProps> = ({
           </p>
         </div>
         
-        <div className="flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col space-y-1">
           <button
             onClick={() => onEdit(demand)}
             className="p-1 hover:bg-blue-500/20 rounded transition-colors"

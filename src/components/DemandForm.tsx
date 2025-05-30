@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,37 @@ const DemandForm: React.FC<DemandFormProps> = ({
     date: initialData?.date || new Date()
   });
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Atualizar dados quando initialData mudar
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title,
+        subject: initialData.subject,
+        date: initialData.date
+      });
+    } else {
+      setFormData({ title: '', subject: '', date: new Date() });
+    }
+  }, [initialData]);
+
+  // Fechar modal ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +85,7 @@ const DemandForm: React.FC<DemandFormProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-popup rounded-2xl p-6 w-full max-w-md animate-fade-in">
+      <div ref={modalRef} className="glass-popup rounded-2xl p-6 w-full max-w-md animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">
             {initialData ? 'Editar Demanda' : 'Nova Demanda'}
