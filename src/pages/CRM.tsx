@@ -219,7 +219,7 @@ const CRM = () => {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </Dialog>
+      </AlertDialog>
     </div>
   );
 };
