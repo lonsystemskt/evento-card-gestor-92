@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import Header from '@/components/Header';
@@ -100,32 +99,30 @@ const Notes = () => {
           <div className="space-y-4">
             {notes.map((note) => (
               <div key={note.id} className="glass rounded-xl p-4 animate-fade-in">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    {/* Assunto */}
-                    <div className="min-w-0 flex-1">
-                      <span className="text-white font-medium text-sm block truncate">
-                        {truncateText(note.subject, 50)}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    {/* Assunto com quebra de linha */}
+                    <div className="mb-3">
+                      <span className="text-white font-medium text-sm leading-relaxed break-words">
+                        {note.subject}
                       </span>
                     </div>
-
-                    {/* Data de prioridade */}
-                    <div className="min-w-0 w-28">
-                      <span className="text-blue-300 text-sm">
-                        {note.priorityDate.toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-
-                    {/* Responsável */}
-                    <div className="min-w-0 w-20">
-                      <span className={`text-sm font-medium ${getOwnerColor(note.owner)}`}>
-                        {note.owner}
-                      </span>
+                    
+                    {/* Data e responsável na linha de baixo */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-blue-300 text-sm">
+                          {note.priorityDate.toLocaleDateString('pt-BR')}
+                        </span>
+                        <span className={`text-sm font-medium ${getOwnerColor(note.owner)}`}>
+                          {note.owner}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Ações */}
-                  <div className="flex items-center space-x-2 ml-4">
+                  <div className="flex items-center space-x-2 flex-shrink-0">
                     <button
                       onClick={() => handleEditNote(note)}
                       className="glass-button p-2 rounded-lg hover:bg-blue-500/30 transition-all duration-200"

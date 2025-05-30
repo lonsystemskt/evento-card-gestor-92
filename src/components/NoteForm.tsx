@@ -54,13 +54,13 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, initialData }) 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="subject" className="text-white">Assunto</Label>
-        <Input
+        <Textarea
           id="subject"
-          type="text"
           value={formData.subject}
           onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-          className="glass-input border-teal-400/40 text-white placeholder:text-gray-400"
+          className="glass-input border-teal-400/40 text-white placeholder:text-gray-400 min-h-[100px] resize-none"
           placeholder="Assunto da anotação"
+          rows={4}
           required
         />
       </div>

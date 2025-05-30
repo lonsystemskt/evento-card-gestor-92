@@ -30,10 +30,6 @@ const CRM = () => {
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const truncateText = (text: string, maxLength: number = 25) => {
-    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-  };
-
   const handleAddContact = (contactData: any) => {
     addContact(contactData);
     setIsFormOpen(false);
@@ -97,45 +93,50 @@ const CRM = () => {
             {contacts.map((contact) => (
               <div key={contact.id} className="glass rounded-xl p-4 animate-fade-in">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-left">
                     {/* Nome */}
-                    <div className="min-w-0 w-48">
+                    <div className="min-w-0">
+                      <div className="text-xs text-blue-300 uppercase tracking-wide mb-1">Nome</div>
                       <span className="text-white font-medium text-sm block truncate">
-                        {truncateText(contact.name, 20)}
+                        {contact.name}
                       </span>
                     </div>
 
                     {/* E-mail */}
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0">
+                      <div className="text-xs text-blue-300 uppercase tracking-wide mb-1">E-mail</div>
                       <span className="text-blue-200 text-sm block truncate">
-                        {truncateText(contact.email, 30)}
+                        {contact.email}
                       </span>
                     </div>
 
                     {/* Telefone */}
-                    <div className="min-w-0 w-32">
+                    <div className="min-w-0">
+                      <div className="text-xs text-blue-300 uppercase tracking-wide mb-1">Telefone</div>
                       <span className="text-blue-200/70 text-sm block truncate">
-                        {truncateText(contact.phone, 15)}
+                        {contact.phone || '-'}
                       </span>
                     </div>
 
                     {/* Assunto */}
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0">
+                      <div className="text-xs text-blue-300 uppercase tracking-wide mb-1">Assunto</div>
                       <span className="text-blue-200/70 text-sm block truncate">
-                        {truncateText(contact.subject, 25)}
+                        {contact.subject}
                       </span>
                     </div>
 
                     {/* Data de prioridade */}
-                    <div className="min-w-0 w-24 text-right">
-                      <span className="text-blue-300 text-xs">
+                    <div className="min-w-0 text-left">
+                      <div className="text-xs text-blue-300 uppercase tracking-wide mb-1">Data</div>
+                      <span className="text-blue-300 text-sm">
                         {contact.priorityDate.toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                   </div>
 
                   {/* Ações */}
-                  <div className="flex items-center space-x-2 ml-4">
+                  <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
                     <button
                       onClick={() => handleEditContact(contact)}
                       className="glass-button p-2 rounded-lg hover:bg-blue-500/30 transition-all duration-200"
@@ -218,7 +219,7 @@ const CRM = () => {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </Dialog>
     </div>
   );
 };
