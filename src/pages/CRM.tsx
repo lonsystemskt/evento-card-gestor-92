@@ -68,7 +68,7 @@ const CRM = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen w-full relative">
       <Header />
       
       <main className="pt-24 px-4 pb-8">
@@ -79,23 +79,23 @@ const CRM = () => {
                 <h2 className="text-2xl font-bold text-white mb-2">
                   CRM - Gestão de Contatos
                 </h2>
-                <p className="text-teal-200/70">
+                <p className="text-blue-200/70">
                   Gerencie seus contatos e leads de forma organizada
                 </p>
               </div>
               <button
                 onClick={() => setIsFormOpen(true)}
-                className="glass-button px-6 py-3 rounded-lg hover:bg-teal-500/30 transition-all duration-200 flex items-center space-x-2"
+                className="glass-button px-6 py-3 rounded-lg hover:bg-blue-500/30 transition-all duration-200 flex items-center space-x-2"
               >
-                <Plus size={18} className="text-teal-300" />
+                <Plus size={18} className="text-blue-300" />
                 <span className="text-white font-medium">Novo CRM</span>
               </button>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {contacts.map((contact) => (
-              <div key={contact.id} className="glass rounded-lg p-4 animate-slide-in">
+              <div key={contact.id} className="glass rounded-xl p-4 animate-fade-in">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 flex-1 min-w-0">
                     {/* Nome */}
@@ -107,28 +107,28 @@ const CRM = () => {
 
                     {/* E-mail */}
                     <div className="min-w-0 flex-1">
-                      <span className="text-teal-200 text-sm block truncate">
+                      <span className="text-blue-200 text-sm block truncate">
                         {truncateText(contact.email, 30)}
                       </span>
                     </div>
 
                     {/* Telefone */}
                     <div className="min-w-0 w-32">
-                      <span className="text-teal-200/70 text-sm block truncate">
+                      <span className="text-blue-200/70 text-sm block truncate">
                         {truncateText(contact.phone, 15)}
                       </span>
                     </div>
 
                     {/* Assunto */}
                     <div className="min-w-0 flex-1">
-                      <span className="text-teal-200/70 text-sm block truncate">
+                      <span className="text-blue-200/70 text-sm block truncate">
                         {truncateText(contact.subject, 25)}
                       </span>
                     </div>
 
                     {/* Data de prioridade */}
                     <div className="min-w-0 w-24 text-right">
-                      <span className="text-teal-300 text-xs">
+                      <span className="text-blue-300 text-xs">
                         {contact.priorityDate.toLocaleDateString('pt-BR')}
                       </span>
                     </div>
@@ -156,8 +156,8 @@ const CRM = () => {
             ))}
 
             {contacts.length === 0 && (
-              <div className="glass rounded-lg p-8 text-center">
-                <p className="text-teal-200/70">Nenhum contato cadastrado</p>
+              <div className="glass rounded-xl p-8 text-center">
+                <p className="text-blue-200/70">Nenhum contato cadastrado</p>
               </div>
             )}
           </div>
@@ -166,7 +166,7 @@ const CRM = () => {
 
       {/* Modal de criação */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="glass-popup border-teal-400/40">
+        <DialogContent className="glass-popup border-blue-400/40">
           <DialogHeader>
             <DialogTitle className="text-white">Novo Contato CRM</DialogTitle>
           </DialogHeader>
@@ -179,7 +179,7 @@ const CRM = () => {
 
       {/* Modal de edição */}
       <Dialog open={!!editingContact} onOpenChange={() => setEditingContact(null)}>
-        <DialogContent className="glass-popup border-teal-400/40">
+        <DialogContent className="glass-popup border-blue-400/40">
           <DialogHeader>
             <DialogTitle className="text-white">Editar Contato</DialogTitle>
           </DialogHeader>
@@ -201,10 +201,10 @@ const CRM = () => {
 
       {/* Confirmação de exclusão */}
       <AlertDialog open={!!deletingContactId} onOpenChange={() => setDeletingContactId(null)}>
-        <AlertDialogContent className="glass-popup border-teal-400/40">
+        <AlertDialogContent className="glass-popup border-blue-400/40">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription className="text-teal-200/70">
+            <AlertDialogDescription className="text-blue-200/70">
               Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>

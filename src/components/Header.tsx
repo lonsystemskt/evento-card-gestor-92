@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Archive, CheckCircle, List, Users, StickyNote } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -46,7 +45,7 @@ const Header = () => {
             >
               Lon Demandas
             </h1>
-            <p className="text-sm text-teal-200/80">
+            <p className="text-sm text-blue-200/80">
               Bem-vindo, hoje é {formatDate(currentTime)} – {formatTime(currentTime)}
             </p>
           </div>
@@ -58,7 +57,7 @@ const Header = () => {
                 isActive('/') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
               }`}
             >
-              Dashboard
+              Demandas
             </button>
 
             <button
