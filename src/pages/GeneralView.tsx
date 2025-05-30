@@ -80,11 +80,11 @@ const GeneralView = () => {
       
       <main className="pt-24 px-4 pb-8">
         <div className="max-w-7xl mx-auto">
-          <div className="glass rounded-xl p-6 mb-6">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="glass rounded-xl p-6 mb-6 text-left">
+            <h2 className="text-2xl font-bold text-white mb-4 text-left">
               Visão Geral - Todas as Demandas
             </h2>
-            <p className="text-blue-200/70">
+            <p className="text-blue-200/70 text-left">
               Visualize todas as demandas do sistema organizadas por evento
             </p>
           </div>
@@ -112,29 +112,29 @@ const GeneralView = () => {
                       </div>
 
                       {/* Nome do evento */}
-                      <div className="min-w-0 w-32">
-                        <span className="text-white font-medium text-sm block truncate">
+                      <div className="min-w-0 w-32 text-left">
+                        <span className="text-white font-medium text-sm block truncate text-left">
                           {truncateText(event.name, 15)}
                         </span>
                       </div>
 
                       {/* Nome da demanda */}
-                      <div className="min-w-0 flex-1">
-                        <span className="text-blue-200 text-sm block truncate">
+                      <div className="min-w-0 flex-1 text-left">
+                        <span className="text-blue-200 text-sm block truncate text-left">
                           {truncateText(demand.title, 25)}
                         </span>
                       </div>
 
                       {/* Assunto da demanda */}
-                      <div className="min-w-0 flex-1">
-                        <span className="text-blue-200/70 text-sm block truncate">
+                      <div className="min-w-0 flex-1 text-left">
+                        <span className="text-blue-200/70 text-sm block truncate text-left">
                           {truncateText(demand.subject, 30)}
                         </span>
                       </div>
 
                       {/* Data */}
-                      <div className="min-w-0 w-24 text-right">
-                        <span className="text-blue-300 text-xs">
+                      <div className="min-w-0 w-24 text-left">
+                        <span className="text-blue-300 text-xs text-left">
                           {demand.date.toLocaleDateString('pt-BR')}
                         </span>
                       </div>
@@ -163,8 +163,8 @@ const GeneralView = () => {
             })}
 
             {allDemands.length === 0 && (
-              <div className="glass rounded-xl p-8 text-center">
-                <p className="text-blue-200/70">Nenhuma demanda encontrada</p>
+              <div className="glass rounded-xl p-8 text-left">
+                <p className="text-blue-200/70 text-left">Nenhuma demanda encontrada</p>
               </div>
             )}
           </div>
@@ -175,7 +175,7 @@ const GeneralView = () => {
       <Dialog open={!!editingDemand} onOpenChange={() => setEditingDemand(null)}>
         <DialogContent className="glass-popup border-blue-400/40">
           <DialogHeader>
-            <DialogTitle className="text-white">Editar Demanda</DialogTitle>
+            <DialogTitle className="text-white text-left">Editar Demanda</DialogTitle>
           </DialogHeader>
           {editingDemand && (
             <DemandForm
@@ -196,12 +196,12 @@ const GeneralView = () => {
       <AlertDialog open={!!deletingDemandId} onOpenChange={() => setDeletingDemandId(null)}>
         <AlertDialogContent className="glass-popup border-blue-400/40">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription className="text-blue-200/70">
+            <AlertDialogTitle className="text-white text-left">Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-blue-200/70 text-left">
               Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex justify-start space-x-2">
             <AlertDialogCancel className="glass-button">Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => deletingDemandId && handleDeleteDemand(deletingDemandId)}
