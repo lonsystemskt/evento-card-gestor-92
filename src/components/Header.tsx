@@ -46,7 +46,7 @@ const Header = () => {
             >
               Lon Demandas
             </h1>
-            <p className="text-sm text-blue-200/80">
+            <p className="text-sm text-teal-200/80">
               Bem-vindo, hoje é {formatDate(currentTime)} – {formatTime(currentTime)}
             </p>
           </div>

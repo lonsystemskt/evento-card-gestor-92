@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calendar, Clock, CheckCircle, Archive } from 'lucide-react';
+import { Calendar, Clock, CheckCircle } from 'lucide-react';
 
 interface SummaryIndicatorsProps {
   totalEvents: number;
@@ -12,8 +12,7 @@ interface SummaryIndicatorsProps {
 const SummaryIndicators: React.FC<SummaryIndicatorsProps> = ({
   totalEvents,
   pendingDemands,
-  completedDemands,
-  archivedEvents
+  completedDemands
 }) => {
   return (
     <div className="absolute top-20 right-4 z-40">
@@ -34,12 +33,6 @@ const SummaryIndicators: React.FC<SummaryIndicatorsProps> = ({
           <CheckCircle size={14} className="text-green-300" />
           <span className="text-xs text-blue-200/70">Concluídas:</span>
           <span className="text-sm font-bold text-white">{completedDemands}</span>
-        </div>
-        
-        <div className="flex items-center space-x-1">
-          <Archive size={14} className="text-gray-300" />
-          <span className="text-xs text-blue-200/70">Arquivados:</span>
-          <span className="text-sm font-bold text-white">{archivedEvents}</span>
         </div>
       </div>
     </div>

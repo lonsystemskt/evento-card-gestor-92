@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event, Demand } from '@/types';
 import DemandCard from './DemandCard';
@@ -33,28 +33,50 @@ const EventRow: React.FC<EventRowProps> = ({
   onCompleteDemand,
   onDeleteDemand
 }) => {
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const updateScrollButtons = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+  };
+
+  useEffect(() => {
+    updateScrollButtons();
+    
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateScrollButtons);
+      const resizeObserver = new ResizeObserver(updateScrollButtons);
+      resizeObserver.observe(container);
+      
+      return () => {
+        container.removeEventListener('scroll', updateScrollButtons);
+        resizeObserver.disconnect();
+      };
+    }
+  }, [demands]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const scrollAmount = 250;
+    const scrollAmount = 280; // Aumentei um pouco para ser mais responsivo
+    const currentScroll = container.scrollLeft;
     const newPosition = direction === 'left' 
-      ? Math.max(0, scrollPosition - scrollAmount)
-      : scrollPosition + scrollAmount;
+      ? Math.max(0, currentScroll - scrollAmount)
+      : currentScroll + scrollAmount;
 
     container.scrollTo({
       left: newPosition,
       behavior: 'smooth'
     });
-    
-    setScrollPosition(newPosition);
   };
-
-  const canScrollLeft = scrollPosition > 0;
-  const canScrollRight = demands.length > 3;
 
   // Ordenar demandas por data (mais recentes primeiro)
   const sortedDemands = [...demands].sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -79,7 +101,7 @@ const EventRow: React.FC<EventRowProps> = ({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="glass-button p-1 rounded-lg hover:bg-white/20 transition-all">
+                <button className="glass-button p-1 rounded-lg hover:bg-white/20 transition-all duration-200">
                   <MoreVertical size={14} className="text-teal-300" />
                 </button>
               </DropdownMenuTrigger>
@@ -122,7 +144,7 @@ const EventRow: React.FC<EventRowProps> = ({
 
           <button
             onClick={() => onAddDemand(event.id)}
-            className="glass-button p-2 rounded-lg hover:bg-teal-500/30 transition-all flex-shrink-0"
+            className="glass-button p-2 rounded-lg hover:bg-teal-500/30 transition-all duration-200 flex-shrink-0"
           >
             <Plus size={16} className="text-teal-300" />
           </button>
@@ -132,8 +154,10 @@ const EventRow: React.FC<EventRowProps> = ({
         <div className="flex items-center space-x-2 flex-1 min-w-0">
           <button
             onClick={() => scroll('left')}
-            className={`glass-button p-2 rounded-lg transition-all flex-shrink-0 ${
-              canScrollLeft ? 'hover:bg-teal-500/30' : 'opacity-50 cursor-not-allowed'
+            className={`glass-button p-2 rounded-lg transition-all duration-300 flex-shrink-0 transform hover:scale-105 ${
+              canScrollLeft 
+                ? 'hover:bg-teal-500/30 opacity-100' 
+                : 'opacity-30 cursor-not-allowed'
             }`}
             disabled={!canScrollLeft}
           >
@@ -164,8 +188,10 @@ const EventRow: React.FC<EventRowProps> = ({
 
           <button
             onClick={() => scroll('right')}
-            className={`glass-button p-2 rounded-lg transition-all flex-shrink-0 ${
-              canScrollRight ? 'hover:bg-teal-500/30' : 'opacity-50 cursor-not-allowed'
+            className={`glass-button p-2 rounded-lg transition-all duration-300 flex-shrink-0 transform hover:scale-105 ${
+              canScrollRight 
+                ? 'hover:bg-teal-500/30 opacity-100' 
+                : 'opacity-30 cursor-not-allowed'
             }`}
             disabled={!canScrollRight}
           >
