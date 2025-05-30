@@ -82,19 +82,16 @@ const EventRow: React.FC<EventRowProps> = ({
     });
   };
 
-  // Função para verificar se o clique está próximo dos ícones de ação
   const isNearActionIcons = (clientX: number, clientY: number) => {
     const container = scrollContainerRef.current;
     if (!container) return false;
 
-    // Buscar todos os botões de ação dentro do container
     const actionButtons = container.querySelectorAll('button');
-    const excludeZone = 8; // 8 pixels de distância
+    const excludeZone = 8;
 
     for (const button of actionButtons) {
       const rect = button.getBoundingClientRect();
       
-      // Verificar se o ponto está dentro da zona de exclusão
       if (
         clientX >= rect.left - excludeZone &&
         clientX <= rect.right + excludeZone &&
@@ -108,9 +105,7 @@ const EventRow: React.FC<EventRowProps> = ({
     return false;
   };
 
-  // Mouse events for drag-to-scroll
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Verificar se o clique está próximo dos ícones de ação
     if (isNearActionIcons(e.clientX, e.clientY)) {
       return;
     }
@@ -158,11 +153,9 @@ const EventRow: React.FC<EventRowProps> = ({
     }
   };
 
-  // Touch events for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
     
-    // Verificar se o toque está próximo dos ícones de ação
     if (isNearActionIcons(touch.clientX, touch.clientY)) {
       return;
     }
@@ -190,7 +183,6 @@ const EventRow: React.FC<EventRowProps> = ({
     setIsDragging(false);
   };
 
-  // Prevent click events when dragging
   const handleContainerClick = (e: React.MouseEvent) => {
     if (isDragging) {
       e.preventDefault();
@@ -198,8 +190,28 @@ const EventRow: React.FC<EventRowProps> = ({
     }
   };
 
-  // Ordenar demandas por data (mais recentes primeiro)
-  const sortedDemands = [...demands].sort((a, b) => b.date.getTime() - a.date.getTime());
+  const getDemandStatus = (demand: Demand) => {
+    const today = new Date();
+    const demandDate = new Date(demand.date);
+    const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    
+    if (diffDays < 0) return 'overdue';
+    if (diffDays <= 3) return 'current';
+    return 'upcoming';
+  };
+
+  const sortedDemands = [...demands].sort((a, b) => {
+    const statusA = getDemandStatus(a);
+    const statusB = getDemandStatus(b);
+    
+    const statusOrder = { 'overdue': 0, 'current': 1, 'upcoming': 2 };
+    
+    if (statusOrder[statusA] !== statusOrder[statusB]) {
+      return statusOrder[statusA] - statusOrder[statusB];
+    }
+    
+    return a.date.getTime() - b.date.getTime();
+  });
 
   useEffect(() => {
     const handleGlobalMouseUp = () => {
@@ -236,21 +248,19 @@ const EventRow: React.FC<EventRowProps> = ({
   }, [isDragging, startX, scrollStartX]);
 
   return (
-    <div className="w-full glass rounded-xl p-4 mb-4 animate-slide-in">
-      <div className="flex items-center space-x-4">
-        {/* Priority Star */}
-        <button
-          onClick={() => onTogglePriority(event.id)}
-          className="glass-button p-2 rounded-lg hover:bg-yellow-500/30 transition-all duration-200 flex-shrink-0"
-          title={event.isPriority ? "Remover prioridade" : "Marcar como prioridade"}
-        >
-          <Star 
-            size={16} 
-            className={event.isPriority ? "text-white fill-white" : "text-green-400 fill-green-400"} 
-          />
-        </button>
+    <div className="w-full glass rounded-xl p-4 mb-4 animate-slide-in relative">
+      <button
+        onClick={() => onTogglePriority(event.id)}
+        className="absolute top-2 left-2 p-1 rounded hover:bg-yellow-500/20 transition-all duration-200 z-10"
+        title={event.isPriority ? "Remover prioridade" : "Marcar como prioridade"}
+      >
+        <Star 
+          size={10} 
+          className={event.isPriority ? "text-yellow-400 fill-yellow-400" : "text-gray-400 fill-gray-400 opacity-60"} 
+        />
+      </button>
 
-        {/* Event Info */}
+      <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3 min-w-0 flex-shrink-0">
           <div className="flex items-center space-x-1">
             <div className="w-12 h-12 glass-card rounded-lg flex items-center justify-center overflow-hidden">
@@ -316,7 +326,6 @@ const EventRow: React.FC<EventRowProps> = ({
           </button>
         </div>
 
-        {/* Navigation Arrows and Demands */}
         <div className="flex items-center space-x-2 flex-1 min-w-0">
           <button
             onClick={() => scroll('left')}
