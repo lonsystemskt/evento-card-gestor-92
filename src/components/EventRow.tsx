@@ -113,7 +113,7 @@ const EventRow: React.FC<EventRowProps> = ({
             </DropdownMenu>
           </div>
           
-          <div className="min-w-0" style={{ width: '170px' }}>
+          <div className="min-w-0" style={{ width: '80px' }}>
             <h3 className="text-white font-medium truncate">{event.name}</h3>
             <p className="text-teal-200/70 text-sm">
               {event.date.toLocaleDateString('pt-BR')}
