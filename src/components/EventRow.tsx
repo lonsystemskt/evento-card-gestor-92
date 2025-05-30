@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event, Demand } from '@/types';
@@ -80,8 +81,39 @@ const EventRow: React.FC<EventRowProps> = ({
     });
   };
 
+  // Função para verificar se o clique está próximo dos ícones de ação
+  const isNearActionIcons = (clientX: number, clientY: number) => {
+    const container = scrollContainerRef.current;
+    if (!container) return false;
+
+    // Buscar todos os botões de ação dentro do container
+    const actionButtons = container.querySelectorAll('button');
+    const excludeZone = 8; // 8 pixels de distância
+
+    for (const button of actionButtons) {
+      const rect = button.getBoundingClientRect();
+      
+      // Verificar se o ponto está dentro da zona de exclusão
+      if (
+        clientX >= rect.left - excludeZone &&
+        clientX <= rect.right + excludeZone &&
+        clientY >= rect.top - excludeZone &&
+        clientY <= rect.bottom + excludeZone
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   // Mouse events for drag-to-scroll
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Verificar se o clique está próximo dos ícones de ação
+    if (isNearActionIcons(e.clientX, e.clientY)) {
+      return;
+    }
+
     const container = scrollContainerRef.current;
     if (!container) return;
 
@@ -127,10 +159,16 @@ const EventRow: React.FC<EventRowProps> = ({
 
   // Touch events for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    
+    // Verificar se o toque está próximo dos ícones de ação
+    if (isNearActionIcons(touch.clientX, touch.clientY)) {
+      return;
+    }
+
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const touch = e.touches[0];
     setIsDragging(true);
     setStartX(touch.clientX);
     setScrollStartX(container.scrollLeft);
