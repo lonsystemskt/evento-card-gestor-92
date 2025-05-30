@@ -1,10 +1,11 @@
-
 export interface Event {
   id: string;
   name: string;
   logo?: string;
   date: Date;
   isArchived: boolean;
+  isPriority: boolean;
+  priorityOrder?: number;
   createdAt: Date;
 }
 

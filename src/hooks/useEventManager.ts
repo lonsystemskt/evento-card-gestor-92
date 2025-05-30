@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Event, Demand } from '@/types';
 
@@ -44,7 +43,8 @@ export const useEventManager = () => {
     const newEvent: Event = {
       ...eventData,
       id: Date.now().toString(),
-      createdAt: new Date()
+      createdAt: new Date(),
+      isPriority: false
     };
     setEvents(prev => [...prev, newEvent]);
     return newEvent;
@@ -54,6 +54,29 @@ export const useEventManager = () => {
     setEvents(prev => prev.map(event => 
       event.id === id ? { ...event, ...updates } : event
     ));
+  };
+
+  const toggleEventPriority = (id: string) => {
+    setEvents(prev => prev.map(event => {
+      if (event.id === id) {
+        if (event.isPriority) {
+          // Remove priority
+          return { ...event, isPriority: false, priorityOrder: undefined };
+        } else {
+          // Add priority with current timestamp as order
+          const maxPriorityOrder = Math.max(
+            ...prev.filter(e => e.isPriority).map(e => e.priorityOrder || 0),
+            0
+          );
+          return { 
+            ...event, 
+            isPriority: true, 
+            priorityOrder: maxPriorityOrder + 1 
+          };
+        }
+      }
+      return event;
+    }));
   };
 
   const deleteEvent = (id: string) => {
@@ -81,15 +104,53 @@ export const useEventManager = () => {
     setDemands(prev => prev.filter(demand => demand.id !== id));
   };
 
-  const getActiveEvents = () => events.filter(event => !event.isArchived);
+  const getActiveEvents = () => {
+    const activeEvents = events.filter(event => !event.isArchived);
+    
+    // Separate priority and non-priority events
+    const priorityEvents = activeEvents
+      .filter(event => event.isPriority)
+      .sort((a, b) => (a.priorityOrder || 0) - (b.priorityOrder || 0));
+    
+    const normalEvents = activeEvents
+      .filter(event => !event.isPriority)
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    
+    return [...priorityEvents, ...normalEvents];
+  };
+
   const getArchivedEvents = () => events.filter(event => event.isArchived);
   
-  const getActiveDemands = (eventId?: string) => 
-    demands.filter(demand => 
+  const getActiveDemands = (eventId?: string) => {
+    const activeDemands = demands.filter(demand => 
       !demand.isCompleted && 
       !demand.isArchived && 
       (eventId ? demand.eventId === eventId : true)
     );
+
+    // Sort by urgency: overdue first, then current, then upcoming
+    return activeDemands.sort((a, b) => {
+      const getUrgencyScore = (demand: Demand) => {
+        const today = new Date();
+        const demandDate = new Date(demand.date);
+        const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+        
+        if (diffDays < 0) return 3; // overdue - highest priority
+        if (diffDays <= 3) return 2; // current - medium priority
+        return 1; // upcoming - lowest priority
+      };
+
+      const scoreA = getUrgencyScore(a);
+      const scoreB = getUrgencyScore(b);
+      
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA; // Higher score first
+      }
+      
+      // If same urgency, sort by date (earliest first)
+      return a.date.getTime() - b.date.getTime();
+    });
+  };
     
   const getCompletedDemands = (eventId?: string) => 
     demands.filter(demand => 
@@ -103,6 +164,7 @@ export const useEventManager = () => {
     addEvent,
     updateEvent,
     deleteEvent,
+    toggleEventPriority,
     addDemand,
     updateDemand,
     deleteDemand,

@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { Event, Demand } from '@/types';
 import DemandCard from './DemandCard';
 import {
@@ -17,6 +16,7 @@ interface EventRowProps {
   onEditEvent: (event: Event) => void;
   onArchiveEvent: (id: string) => void;
   onDeleteEvent: (id: string) => void;
+  onTogglePriority: (id: string) => void;
   onEditDemand: (demand: Demand) => void;
   onCompleteDemand: (id: string) => void;
   onDeleteDemand: (id: string) => void;
@@ -29,6 +29,7 @@ const EventRow: React.FC<EventRowProps> = ({
   onEditEvent,
   onArchiveEvent,
   onDeleteEvent,
+  onTogglePriority,
   onEditDemand,
   onCompleteDemand,
   onDeleteDemand
@@ -237,6 +238,18 @@ const EventRow: React.FC<EventRowProps> = ({
   return (
     <div className="w-full glass rounded-xl p-4 mb-4 animate-slide-in">
       <div className="flex items-center space-x-4">
+        {/* Priority Star */}
+        <button
+          onClick={() => onTogglePriority(event.id)}
+          className="glass-button p-2 rounded-lg hover:bg-yellow-500/30 transition-all duration-200 flex-shrink-0"
+          title={event.isPriority ? "Remover prioridade" : "Marcar como prioridade"}
+        >
+          <Star 
+            size={16} 
+            className={event.isPriority ? "text-white fill-white" : "text-green-400 fill-green-400"} 
+          />
+        </button>
+
         {/* Event Info */}
         <div className="flex items-center space-x-3 min-w-0 flex-shrink-0">
           <div className="flex items-center space-x-1">

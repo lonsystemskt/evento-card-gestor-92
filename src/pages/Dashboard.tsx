@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import Header from '@/components/Header';
@@ -14,6 +13,7 @@ const Dashboard = () => {
     addEvent,
     updateEvent,
     deleteEvent,
+    toggleEventPriority,
     addDemand,
     updateDemand,
     deleteDemand,
@@ -49,7 +49,8 @@ const Dashboard = () => {
         name: data.name,
         date: data.date,
         logo: data.logo ? URL.createObjectURL(data.logo) : undefined,
-        isArchived: false
+        isArchived: false,
+        isPriority: false
       });
     }
   };
@@ -127,7 +128,7 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {sortedEvents.map((event) => (
+            {activeEvents.map((event) => (
               <EventRow
                 key={event.id}
                 event={event}
@@ -136,13 +137,14 @@ const Dashboard = () => {
                 onEditEvent={handleEditEvent}
                 onArchiveEvent={handleArchiveEvent}
                 onDeleteEvent={deleteEvent}
+                onTogglePriority={toggleEventPriority}
                 onEditDemand={handleEditDemand}
                 onCompleteDemand={handleCompleteDemand}
                 onDeleteDemand={deleteDemand}
               />
             ))}
 
-            {sortedEvents.length === 0 && (
+            {activeEvents.length === 0 && (
               <div className="glass rounded-xl p-12 text-center">
                 <div className="max-w-md mx-auto">
                   <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
