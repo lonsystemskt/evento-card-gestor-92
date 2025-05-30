@@ -174,12 +174,25 @@ const Dashboard = () => {
         initialData={editingEvent || undefined}
       />
 
-      <DemandForm
-        isOpen={showDemandForm}
-        onClose={closeDemandForm}
-        onSubmit={handleDemandSubmit}
-        initialData={editingDemand || undefined}
-      />
+      {showDemandForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="glass rounded-xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold text-white mb-4">
+              {editingDemand ? 'Editar Demanda' : 'Nova Demanda'}
+            </h2>
+            <DemandForm
+              eventId={selectedEventId}
+              onSubmit={handleDemandSubmit}
+              onCancel={closeDemandForm}
+              initialData={editingDemand ? {
+                title: editingDemand.title,
+                subject: editingDemand.subject,
+                date: editingDemand.date
+              } : undefined}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
