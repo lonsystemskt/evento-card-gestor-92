@@ -103,20 +103,20 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full relative">
       <Header />
       
+      <SummaryIndicators
+        totalEvents={activeEvents.length}
+        pendingDemands={activeDemands.length}
+        completedDemands={completedDemands.length}
+        archivedEvents={archivedEvents}
+      />
+      
       <div className="pt-24">
-        <SummaryIndicators
-          totalEvents={activeEvents.length}
-          pendingDemands={activeDemands.length}
-          completedDemands={completedDemands.length}
-          archivedEvents={archivedEvents}
-        />
-
         <div className="px-4 mt-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Eventos Ativos</h2>
+            <div></div>
             <button
               onClick={() => setShowEventForm(true)}
               className="glass-button px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-500/30 transition-all"

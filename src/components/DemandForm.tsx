@@ -32,6 +32,7 @@ const DemandForm: React.FC<DemandFormProps> = ({
   });
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   // Atualizar dados quando initialData mudar
   useEffect(() => {
@@ -46,10 +47,14 @@ const DemandForm: React.FC<DemandFormProps> = ({
     }
   }, [initialData]);
 
-  // Fechar modal ao clicar fora
+  // Fechar modal ao clicar fora, mas não no calendário
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        // Verificar se o clique foi no calendário
+        if (calendarRef.current && calendarRef.current.contains(event.target as Node)) {
+          return; // Não fechar se clicou no calendário
+        }
         onClose();
       }
     };
@@ -139,14 +144,20 @@ const DemandForm: React.FC<DemandFormProps> = ({
                   {formData.date ? format(formData.date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 glass-popup border-blue-500/30" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.date}
-                  onSelect={handleDateSelect}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
+              <PopoverContent 
+                className="w-auto p-0 glass-popup border-blue-500/30" 
+                align="start"
+                side="top"
+              >
+                <div ref={calendarRef}>
+                  <Calendar
+                    mode="single"
+                    selected={formData.date}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </div>
               </PopoverContent>
             </Popover>
           </div>

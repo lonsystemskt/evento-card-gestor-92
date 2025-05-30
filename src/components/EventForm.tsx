@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Calendar as CalendarIcon } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,33 +26,37 @@ const EventForm: React.FC<EventFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<EventFormData>({
     name: initialData?.name || '',
-    date: initialData?.date || new Date()
+    date: initialData?.date || new Date(),
+    logo: undefined
   });
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>(initialData?.logo || '');
+  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   // Atualizar dados quando initialData mudar
   useEffect(() => {
     if (initialData) {
       setFormData({
         name: initialData.name,
-        date: initialData.date
+        date: initialData.date,
+        logo: undefined
       });
-      setLogoPreview(initialData.logo || '');
+      setLogoPreview(initialData.logo || null);
     } else {
-      setFormData({ name: '', date: new Date() });
-      setLogoPreview('');
+      setFormData({ name: '', date: new Date(), logo: undefined });
+      setLogoPreview(null);
     }
-    setLogoFile(null);
   }, [initialData]);
 
-  // Fechar modal ao clicar fora
+  // Fechar modal ao clicar fora, mas não no calendário
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        // Verificar se o clique foi no calendário
+        if (calendarRef.current && calendarRef.current.contains(event.target as Node)) {
+          return; // Não fechar se clicou no calendário
+        }
         onClose();
       }
     };
@@ -66,40 +70,34 @@ const EventForm: React.FC<EventFormProps> = ({
     };
   }, [isOpen, onClose]);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    const submitData: EventFormData = {
-      ...formData,
-      logo: logoFile || undefined
-    };
-
-    onSubmit(submitData);
+    onSubmit(formData);
     onClose();
     
     // Reset form
-    setFormData({ name: '', date: new Date() });
-    setLogoFile(null);
-    setLogoPreview('');
+    setFormData({ name: '', date: new Date(), logo: undefined });
+    setLogoPreview(null);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       setFormData(prev => ({ ...prev, date }));
       setDatePickerOpen(false);
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, logo: file }));
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -134,36 +132,6 @@ const EventForm: React.FC<EventFormProps> = ({
           </div>
 
           <div>
-            <Label className="text-white">Logo do Evento</Label>
-            <div className="mt-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleLogoChange}
-                className="hidden"
-              />
-              
-              <div className="flex items-center space-x-4">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="glass-button px-4 py-2 rounded-lg flex items-center space-x-2"
-                >
-                  <Upload size={16} className="text-blue-300" />
-                  <span className="text-white">Escolher Arquivo</span>
-                </button>
-                
-                {logoPreview && (
-                  <div className="w-12 h-12 glass-card rounded-lg overflow-hidden">
-                    <img src={logoPreview} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div>
             <Label className="text-white">Data do Evento</Label>
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
@@ -178,16 +146,44 @@ const EventForm: React.FC<EventFormProps> = ({
                   {formData.date ? format(formData.date, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 glass-popup border-blue-500/30" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.date}
-                  onSelect={handleDateSelect}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
+              <PopoverContent 
+                className="w-auto p-0 glass-popup border-blue-500/30" 
+                align="start"
+                side="top"
+              >
+                <div ref={calendarRef}>
+                  <Calendar
+                    mode="single"
+                    selected={formData.date}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </div>
               </PopoverContent>
             </Popover>
+          </div>
+
+          <div>
+            <Label className="text-white">Logo do Evento</Label>
+            <div className="flex items-center space-x-4">
+              <label className="glass-button px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-all flex items-center space-x-2">
+                <Upload size={16} className="text-blue-300" />
+                <span className="text-white">Escolher arquivo</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  className="hidden"
+                />
+              </label>
+              
+              {logoPreview && (
+                <div className="w-12 h-12 glass-card rounded-lg overflow-hidden">
+                  <img src={logoPreview} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex space-x-3 pt-4">

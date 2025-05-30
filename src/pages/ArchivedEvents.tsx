@@ -23,11 +23,6 @@ const ArchivedEvents = () => {
       <Header />
       
       <div className="pt-24 px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Eventos Arquivados</h1>
-          <p className="text-blue-200/70">Gerencie seus eventos arquivados</p>
-        </div>
-
         {archivedEvents.length === 0 ? (
           <div className="glass rounded-xl p-12 text-center">
             <div className="max-w-md mx-auto">
