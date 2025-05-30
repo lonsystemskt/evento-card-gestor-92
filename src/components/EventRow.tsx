@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { Event, Demand } from '@/types';
@@ -260,8 +261,9 @@ const EventRow: React.FC<EventRowProps> = ({
         />
       </button>
 
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-3 min-w-0 flex-shrink-0">
+      <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
+        {/* Event Info Section - Fixed Width for Consistency */}
+        <div className="flex items-center space-x-3 min-w-0 flex-shrink-0 lg:w-64">
           <div className="flex items-center space-x-1">
             <div className="w-12 h-12 glass-card rounded-lg flex items-center justify-center overflow-hidden">
               {event.logo ? (
@@ -282,7 +284,7 @@ const EventRow: React.FC<EventRowProps> = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="glass-popup border-teal-400/40 shadow-2xl backdrop-blur-xl"
+                className="glass-popup border-teal-400/40 shadow-2xl backdrop-blur-xl z-50"
                 align="start"
                 sideOffset={5}
               >
@@ -311,9 +313,9 @@ const EventRow: React.FC<EventRowProps> = ({
             </DropdownMenu>
           </div>
           
-          <div className="min-w-0" style={{ width: '80px' }}>
-            <h3 className="text-white font-medium truncate">{event.name}</h3>
-            <p className="text-teal-200/70 text-sm">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-white font-medium truncate text-sm lg:text-base">{event.name}</h3>
+            <p className="text-teal-200/70 text-xs lg:text-sm">
               {event.date.toLocaleDateString('pt-BR')}
             </p>
           </div>
@@ -326,6 +328,7 @@ const EventRow: React.FC<EventRowProps> = ({
           </button>
         </div>
 
+        {/* Demands Section - Scrollable */}
         <div className="flex items-center space-x-2 flex-1 min-w-0">
           <button
             onClick={() => scroll('left')}

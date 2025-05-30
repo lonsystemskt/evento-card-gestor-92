@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
-import { Archive, CheckCircle, List, Users, StickyNote } from 'lucide-react';
+import { Archive, CheckCircle, List, Users, StickyNote, Menu, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,83 +36,86 @@ const Header = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const navigationItems = [
+    { path: '/', label: 'Demandas', icon: null },
+    { path: '/geral', label: 'Geral', icon: List },
+    { path: '/crm', label: 'CRM', icon: Users },
+    { path: '/anotacoes', label: 'Anotações', icon: StickyNote },
+    { path: '/eventos-arquivados', label: 'Arquivados', icon: Archive },
+    { path: '/demandas-concluidas', label: 'Concluídas', icon: CheckCircle }
+  ];
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
       <div className="px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <h1 
-              className="text-2xl font-bold text-white cursor-pointer hover:text-blue-300 transition-colors"
+              className="text-xl lg:text-2xl font-bold text-white cursor-pointer hover:text-blue-300 transition-colors"
               onClick={() => navigate('/')}
             >
               Lon Demandas
             </h1>
-            <p className="text-sm text-blue-200/80">
+            <p className="text-xs lg:text-sm text-blue-200/80 hidden sm:block">
               Bem-vindo, hoje é {formatDate(currentTime)} – {formatTime(currentTime)}
             </p>
           </div>
           
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => navigate('/')}
-              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                isActive('/') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
-              }`}
-            >
-              Demandas
-            </button>
-
-            <button
-              onClick={() => navigate('/geral')}
-              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
-                isActive('/geral') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
-              }`}
-            >
-              <List size={16} />
-              <span>Geral</span>
-            </button>
-
-            <button
-              onClick={() => navigate('/crm')}
-              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
-                isActive('/crm') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
-              }`}
-            >
-              <Users size={16} />
-              <span>CRM</span>
-            </button>
-
-            <button
-              onClick={() => navigate('/anotacoes')}
-              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
-                isActive('/anotacoes') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
-              }`}
-            >
-              <StickyNote size={16} />
-              <span>Anotações</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/eventos-arquivados')}
-              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
-                isActive('/eventos-arquivados') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
-              }`}
-            >
-              <Archive size={16} />
-              <span>Arquivados</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/demandas-concluidas')}
-              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
-                isActive('/demandas-concluidas') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
-              }`}
-            >
-              <CheckCircle size={16} />
-              <span>Concluídas</span>
-            </button>
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-3">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavigation(item.path)}
+                  className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
+                    isActive(item.path) ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
+                  }`}
+                >
+                  {Icon && <Icon size={16} />}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden glass-button p-2 rounded-lg"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden mt-4 glass rounded-lg p-4 animate-fade-in">
+            <div className="flex flex-col space-y-2">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavigation(item.path)}
+                    className={`glass-button px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
+                      isActive(item.path) ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
+                    }`}
+                  >
+                    {Icon && <Icon size={16} />}
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

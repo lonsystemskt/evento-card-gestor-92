@@ -58,15 +58,30 @@
   }
   
   .glass-popup {
-    @apply bg-slate-900/95 backdrop-blur-2xl border border-teal-400/30 shadow-2xl;
+    @apply bg-slate-900/95 backdrop-blur-2xl border border-teal-400/30 shadow-2xl z-50;
   }
   
   .glass-button {
     @apply bg-teal-500/20 hover:bg-teal-500/30 backdrop-blur-lg border border-teal-400/30 transition-all duration-200 shadow-lg;
   }
   
+  .glass-input {
+    @apply bg-white/5 backdrop-blur-lg border border-white/20 shadow-xl focus:border-teal-400/40;
+  }
+  
   .floating-box {
     @apply glass rounded-2xl p-6 animate-fade-in;
+  }
+
+  /* Responsividade para elementos específicos */
+  @media (max-width: 768px) {
+    .glass {
+      @apply p-3;
+    }
+    
+    .glass-popup {
+      @apply m-2 max-w-[calc(100vw-1rem)];
+    }
   }
 }
 
@@ -77,4 +92,33 @@
 
 .scroll-hidden::-webkit-scrollbar {
   display: none;
+}
+
+/* Animações suaves para transições */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
