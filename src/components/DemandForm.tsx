@@ -55,6 +55,10 @@ const DemandForm: React.FC<DemandFormProps> = ({
         if (calendarRef.current && calendarRef.current.contains(event.target as Node)) {
           return; // Não fechar se clicou no calendário
         }
+        // Se o calendário estiver aberto, não fechar o modal
+        if (datePickerOpen) {
+          return;
+        }
         onClose();
       }
     };
@@ -66,7 +70,7 @@ const DemandForm: React.FC<DemandFormProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, datePickerOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,11 +149,12 @@ const DemandForm: React.FC<DemandFormProps> = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-auto p-0 glass-popup border-blue-500/30" 
+                className="w-auto p-0 glass-popup border-blue-400/30 shadow-2xl backdrop-blur-xl z-[10000]" 
                 align="start"
                 side="top"
+                sideOffset={10}
               >
-                <div ref={calendarRef}>
+                <div ref={calendarRef} className="pointer-events-auto">
                   <Calendar
                     mode="single"
                     selected={formData.date}

@@ -99,7 +99,7 @@ const EventRow: React.FC<EventRowProps> = ({
               </button>
 
               {showMenu && (
-                <div className="absolute top-full left-0 mt-2 glass-popup rounded-lg py-2 w-48 z-50">
+                <div className="absolute top-full left-0 mt-2 glass-popup rounded-lg py-2 w-48 z-[9999] shadow-2xl backdrop-blur-xl border border-blue-400/30">
                   <button
                     onClick={() => {
                       onEditEvent(event);
