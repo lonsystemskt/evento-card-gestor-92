@@ -1,3 +1,4 @@
+
 export interface Event {
   id: string;
   name: string;
@@ -20,6 +21,24 @@ export interface Demand {
   createdAt: Date;
 }
 
+export interface CRMContact {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  priorityDate: Date;
+  createdAt: Date;
+}
+
+export interface Note {
+  id: string;
+  subject: string;
+  priorityDate: Date;
+  owner: 'Thiago' | 'Kalil';
+  createdAt: Date;
+}
+
 export type DemandStatus = 'overdue' | 'current' | 'upcoming';
 
 export interface EventFormData {
@@ -32,4 +51,18 @@ export interface DemandFormData {
   title: string;
   subject: string;
   date: Date;
+}
+
+export interface CRMFormData {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  priorityDate: Date;
+}
+
+export interface NoteFormData {
+  subject: string;
+  priorityDate: Date;
+  owner: 'Thiago' | 'Kalil';
 }

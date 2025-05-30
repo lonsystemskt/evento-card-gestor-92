@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Archive, CheckCircle } from 'lucide-react';
+import { Archive, CheckCircle, List, Users, StickyNote } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
@@ -59,6 +59,36 @@ const Header = () => {
               }`}
             >
               Dashboard
+            </button>
+
+            <button
+              onClick={() => navigate('/geral')}
+              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
+                isActive('/geral') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
+              }`}
+            >
+              <List size={16} />
+              <span>Geral</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/crm')}
+              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
+                isActive('/crm') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
+              }`}
+            >
+              <Users size={16} />
+              <span>CRM</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/anotacoes')}
+              className={`glass-button px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
+                isActive('/anotacoes') ? 'bg-blue-500/40 text-white' : 'text-blue-200 hover:text-white'
+              }`}
+            >
+              <StickyNote size={16} />
+              <span>Anotações</span>
             </button>
             
             <button
