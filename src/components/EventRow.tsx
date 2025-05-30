@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event, Demand } from '@/types';
@@ -35,6 +34,9 @@ const EventRow: React.FC<EventRowProps> = ({
 }) => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollStartX, setScrollStartX] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const updateScrollButtons = () => {
@@ -66,7 +68,7 @@ const EventRow: React.FC<EventRowProps> = ({
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const scrollAmount = 280; // Aumentei um pouco para ser mais responsivo
+    const scrollAmount = 280;
     const currentScroll = container.scrollLeft;
     const newPosition = direction === 'left' 
       ? Math.max(0, currentScroll - scrollAmount)
@@ -78,8 +80,121 @@ const EventRow: React.FC<EventRowProps> = ({
     });
   };
 
+  // Mouse events for drag-to-scroll
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    setIsDragging(true);
+    setStartX(e.clientX);
+    setScrollStartX(container.scrollLeft);
+    container.style.cursor = 'grabbing';
+    container.style.userSelect = 'none';
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    e.preventDefault();
+    const deltaX = e.clientX - startX;
+    container.scrollLeft = scrollStartX - deltaX;
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.style.cursor = 'grab';
+      container.style.userSelect = '';
+    }
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.style.cursor = 'grab';
+        container.style.userSelect = '';
+      }
+      setIsDragging(false);
+    }
+  };
+
+  // Touch events for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setStartX(touch.clientX);
+    setScrollStartX(container.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - startX;
+    container.scrollLeft = scrollStartX - deltaX;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Prevent click events when dragging
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (isDragging) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   // Ordenar demandas por data (mais recentes primeiro)
   const sortedDemands = [...demands].sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        const container = scrollContainerRef.current;
+        if (container) {
+          container.style.cursor = 'grab';
+          container.style.userSelect = '';
+        }
+        setIsDragging(false);
+      }
+    };
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      e.preventDefault();
+      const deltaX = e.clientX - startX;
+      container.scrollLeft = scrollStartX - deltaX;
+    };
+
+    if (isDragging) {
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+    }
+
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+    };
+  }, [isDragging, startX, scrollStartX]);
 
   return (
     <div className="w-full glass rounded-xl p-4 mb-4 animate-slide-in">
@@ -166,8 +281,19 @@ const EventRow: React.FC<EventRowProps> = ({
 
           <div 
             ref={scrollContainerRef}
-            className="flex space-x-3 overflow-hidden scroll-hidden flex-1"
-            style={{ scrollBehavior: 'smooth' }}
+            className="flex space-x-3 overflow-hidden scroll-hidden flex-1 select-none"
+            style={{ 
+              scrollBehavior: isDragging ? 'auto' : 'smooth',
+              cursor: isDragging ? 'grabbing' : 'grab'
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onClick={handleContainerClick}
           >
             {sortedDemands.map((demand) => (
               <DemandCard
