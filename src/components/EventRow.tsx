@@ -82,8 +82,8 @@ const EventRow: React.FC<EventRowProps> = ({
               {event.logo ? (
                 <img src={event.logo} alt={event.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center">
-                  <span className="text-blue-300 font-bold text-sm">
+                <div className="w-8 h-8 bg-teal-500/30 rounded-lg flex items-center justify-center">
+                  <span className="text-teal-300 font-bold text-sm">
                     {event.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -95,11 +95,18 @@ const EventRow: React.FC<EventRowProps> = ({
                 onClick={() => setShowMenu(!showMenu)}
                 className="glass-button p-1 rounded-lg hover:bg-white/20 transition-all"
               >
-                <MoreVertical size={14} className="text-blue-300" />
+                <MoreVertical size={14} className="text-teal-300" />
               </button>
 
               {showMenu && (
-                <div className="absolute top-full left-0 mt-2 glass-popup rounded-lg py-2 w-48 z-[9999] shadow-2xl backdrop-blur-xl border border-blue-400/30">
+                <div 
+                  className="fixed glass-popup rounded-lg py-2 w-48 shadow-2xl backdrop-blur-xl border border-teal-400/30"
+                  style={{
+                    zIndex: 99999,
+                    top: menuRef.current ? menuRef.current.getBoundingClientRect().bottom + 8 : 0,
+                    left: menuRef.current ? menuRef.current.getBoundingClientRect().left : 0,
+                  }}
+                >
                   <button
                     onClick={() => {
                       onEditEvent(event);
@@ -137,16 +144,16 @@ const EventRow: React.FC<EventRowProps> = ({
           
           <div className="min-w-0" style={{ width: '170px' }}>
             <h3 className="text-white font-medium truncate">{event.name}</h3>
-            <p className="text-blue-200/70 text-sm">
+            <p className="text-teal-200/70 text-sm">
               {event.date.toLocaleDateString('pt-BR')}
             </p>
           </div>
 
           <button
             onClick={() => onAddDemand(event.id)}
-            className="glass-button p-2 rounded-lg hover:bg-blue-500/30 transition-all flex-shrink-0"
+            className="glass-button p-2 rounded-lg hover:bg-teal-500/30 transition-all flex-shrink-0"
           >
-            <Plus size={16} className="text-blue-300" />
+            <Plus size={16} className="text-teal-300" />
           </button>
         </div>
 
@@ -155,11 +162,11 @@ const EventRow: React.FC<EventRowProps> = ({
           <button
             onClick={() => scroll('left')}
             className={`glass-button p-2 rounded-lg transition-all flex-shrink-0 ${
-              canScrollLeft ? 'hover:bg-blue-500/30' : 'opacity-50 cursor-not-allowed'
+              canScrollLeft ? 'hover:bg-teal-500/30' : 'opacity-50 cursor-not-allowed'
             }`}
             disabled={!canScrollLeft}
           >
-            <ChevronLeft size={16} className="text-blue-300" />
+            <ChevronLeft size={16} className="text-teal-300" />
           </button>
 
           <div 
@@ -179,7 +186,7 @@ const EventRow: React.FC<EventRowProps> = ({
             
             {sortedDemands.length === 0 && (
               <div className="w-[230px] h-[90px] glass-card rounded-lg flex items-center justify-center flex-shrink-0">
-                <p className="text-blue-200/70 text-sm">Nenhuma demanda</p>
+                <p className="text-teal-200/70 text-sm">Nenhuma demanda</p>
               </div>
             )}
           </div>
@@ -187,11 +194,11 @@ const EventRow: React.FC<EventRowProps> = ({
           <button
             onClick={() => scroll('right')}
             className={`glass-button p-2 rounded-lg transition-all flex-shrink-0 ${
-              canScrollRight ? 'hover:bg-blue-500/30' : 'opacity-50 cursor-not-allowed'
+              canScrollRight ? 'hover:bg-teal-500/30' : 'opacity-50 cursor-not-allowed'
             }`}
             disabled={!canScrollRight}
           >
-            <ChevronRight size={16} className="text-blue-300" />
+            <ChevronRight size={16} className="text-teal-300" />
           </button>
         </div>
       </div>
