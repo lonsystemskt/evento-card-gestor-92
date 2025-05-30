@@ -1,8 +1,14 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event, Demand } from '@/types';
 import DemandCard from './DemandCard';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface EventRowProps {
   event: Event;
@@ -27,58 +33,8 @@ const EventRow: React.FC<EventRowProps> = ({
   onCompleteDemand,
   onDeleteDemand
 }) => {
-  const [showMenu, setShowMenu] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  // Calcular posição do menu quando abrir
-  useEffect(() => {
-    if (showMenu && triggerRef.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const menuWidth = 192; // w-48 = 192px
-      const menuHeight = 120; // altura aproximada do menu
-      
-      // Posicionar ligeiramente acima e à direita do botão
-      let top = triggerRect.top - menuHeight - 8;
-      let left = triggerRect.left;
-      
-      // Verificar se o menu sairia da tela e ajustar
-      if (top < 8) {
-        top = triggerRect.bottom + 8; // Mostrar abaixo se não couber acima
-      }
-      
-      if (left + menuWidth > window.innerWidth - 8) {
-        left = window.innerWidth - menuWidth - 8; // Ajustar para não sair da lateral direita
-      }
-      
-      if (left < 8) {
-        left = 8; // Não deixar sair da lateral esquerda
-      }
-      
-      setMenuPosition({ top, left });
-    }
-  }, [showMenu]);
-
-  // Fechar menu ao clicar fora
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node) &&
-          triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-
-    if (showMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showMenu]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
@@ -121,63 +77,40 @@ const EventRow: React.FC<EventRowProps> = ({
               )}
             </div>
             
-            <div className="relative">
-              <button
-                ref={triggerRef}
-                onClick={() => setShowMenu(!showMenu)}
-                className="glass-button p-1 rounded-lg hover:bg-white/20 transition-all"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="glass-button p-1 rounded-lg hover:bg-white/20 transition-all">
+                  <MoreVertical size={14} className="text-teal-300" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                className="glass-popup border-teal-400/40 shadow-2xl backdrop-blur-xl"
+                align="start"
+                sideOffset={5}
               >
-                <MoreVertical size={14} className="text-teal-300" />
-              </button>
-
-              {showMenu && (
-                <>
-                  {/* Overlay para capturar cliques fora */}
-                  <div className="fixed inset-0 z-[9998]" onClick={() => setShowMenu(false)} />
-                  
-                  {/* Menu dropdown */}
-                  <div 
-                    ref={menuRef}
-                    className="fixed bg-slate-900/98 backdrop-blur-2xl border border-teal-400/40 rounded-lg py-2 w-48 shadow-2xl z-[9999]"
-                    style={{
-                      top: `${menuPosition.top}px`,
-                      left: `${menuPosition.left}px`,
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        onEditEvent(event);
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center space-x-2"
-                    >
-                      <Edit size={14} />
-                      <span>Editar evento</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        onArchiveEvent(event.id);
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center space-x-2"
-                    >
-                      <Archive size={14} />
-                      <span>Arquivar evento</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        onDeleteEvent(event.id);
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-red-300 hover:bg-red-500/10 transition-colors flex items-center space-x-2"
-                    >
-                      <Trash2 size={14} />
-                      <span>Excluir permanentemente</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+                <DropdownMenuItem 
+                  onClick={() => onEditEvent(event)}
+                  className="text-white hover:bg-white/10 cursor-pointer flex items-center space-x-2"
+                >
+                  <Edit size={14} />
+                  <span>Editar evento</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onArchiveEvent(event.id)}
+                  className="text-white hover:bg-white/10 cursor-pointer flex items-center space-x-2"
+                >
+                  <Archive size={14} />
+                  <span>Arquivar evento</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onDeleteEvent(event.id)}
+                  className="text-red-300 hover:bg-red-500/10 cursor-pointer flex items-center space-x-2"
+                >
+                  <Trash2 size={14} />
+                  <span>Excluir permanentemente</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           <div className="min-w-0" style={{ width: '170px' }}>
