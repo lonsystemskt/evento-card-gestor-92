@@ -40,7 +40,9 @@ const CRMForm: React.FC<CRMFormProps> = ({ onSubmit, onCancel, initialData }) =>
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      setFormData(prev => ({ ...prev, priorityDate: date }));
+      // Criar uma nova data no horário local para evitar problemas de fuso horário
+      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      setFormData(prev => ({ ...prev, priorityDate: localDate }));
       setIsCalendarOpen(false);
     }
   };

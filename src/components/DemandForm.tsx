@@ -58,7 +58,9 @@ const DemandForm: React.FC<DemandFormProps> = ({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      setFormData(prev => ({ ...prev, date }));
+      // Criar uma nova data no horário local para evitar problemas de fuso horário
+      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      setFormData(prev => ({ ...prev, date: localDate }));
       setDatePickerOpen(false);
     }
   };

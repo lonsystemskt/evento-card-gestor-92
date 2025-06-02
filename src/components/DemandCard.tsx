@@ -17,10 +17,10 @@ const DemandCard: React.FC<DemandCardProps> = ({
   onComplete
 }) => {
   const getStatus = (): DemandStatus => {
+    // Usar apenas a data sem horário para comparação
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const demandDate = new Date(demand.date);
-    demandDate.setHours(0, 0, 0, 0);
+    const demandDate = new Date(demand.date.getFullYear(), demand.date.getMonth(), demand.date.getDate());
     const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
     
     if (diffDays < 0) return 'overdue';

@@ -132,10 +132,10 @@ export const useEventManager = () => {
     // Sort by urgency: overdue first, then current, then upcoming
     return activeDemands.sort((a, b) => {
       const getUrgencyScore = (demand: Demand) => {
+        // Usar apenas a data sem horário para comparação
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const demandDate = new Date(demand.date);
-        demandDate.setHours(0, 0, 0, 0);
+        const demandDate = new Date(demand.date.getFullYear(), demand.date.getMonth(), demand.date.getDate());
         const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
         
         if (diffDays < 0) return 3; // overdue - highest priority
