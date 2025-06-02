@@ -1,20 +1,34 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { RotateCcw, Trash2, AlertCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import { useEventManager } from '@/hooks/useEventManager';
+import { useToast } from '@/hooks/use-toast';
 
 const ArchivedEvents = () => {
   const { getArchivedEvents, updateEvent, deleteEvent } = useEventManager();
+  const { toast } = useToast();
   const archivedEvents = getArchivedEvents();
 
+  console.log('ArchivedEvents - Archived events:', archivedEvents.length);
+
   const handleRestore = (id: string) => {
+    console.log('ArchivedEvents - Restoring event:', id);
     updateEvent(id, { isArchived: false });
+    toast({
+      title: "Evento restaurado",
+      description: "O evento foi restaurado para ativo.",
+    });
   };
 
   const handlePermanentDelete = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir permanentemente este evento? Esta ação não pode ser desfeita.')) {
+      console.log('ArchivedEvents - Permanently deleting event:', id);
       deleteEvent(id);
+      toast({
+        title: "Evento excluído",
+        description: "O evento foi excluído permanentemente.",
+      });
     }
   };
 
@@ -23,6 +37,11 @@ const ArchivedEvents = () => {
       <Header />
       
       <div className="pt-24 px-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Eventos Arquivados</h1>
+          <p className="text-blue-200/70">Gerencie seus eventos arquivados</p>
+        </div>
+
         {archivedEvents.length === 0 ? (
           <div className="glass rounded-xl p-12 text-center">
             <div className="max-w-md mx-auto">

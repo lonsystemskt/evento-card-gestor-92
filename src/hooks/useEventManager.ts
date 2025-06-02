@@ -13,32 +13,54 @@ export const useEventManager = () => {
     const savedDemands = localStorage.getItem('lon-demands');
     
     if (savedEvents) {
-      const parsedEvents = JSON.parse(savedEvents).map((event: any) => ({
-        ...event,
-        date: new Date(event.date),
-        createdAt: new Date(event.createdAt)
-      }));
-      setEvents(parsedEvents);
+      try {
+        const parsedEvents = JSON.parse(savedEvents).map((event: any) => ({
+          ...event,
+          date: new Date(event.date),
+          createdAt: new Date(event.createdAt),
+          isArchived: Boolean(event.isArchived),
+          isPriority: Boolean(event.isPriority)
+        }));
+        console.log('Loaded events from localStorage:', parsedEvents);
+        setEvents(parsedEvents);
+      } catch (error) {
+        console.error('Error loading events:', error);
+        setEvents([]);
+      }
     }
     
     if (savedDemands) {
-      const parsedDemands = JSON.parse(savedDemands).map((demand: any) => ({
-        ...demand,
-        date: new Date(demand.date),
-        createdAt: new Date(demand.createdAt)
-      }));
-      setDemands(parsedDemands);
+      try {
+        const parsedDemands = JSON.parse(savedDemands).map((demand: any) => ({
+          ...demand,
+          date: new Date(demand.date),
+          createdAt: new Date(demand.createdAt),
+          isCompleted: Boolean(demand.isCompleted),
+          isArchived: Boolean(demand.isArchived)
+        }));
+        console.log('Loaded demands from localStorage:', parsedDemands);
+        setDemands(parsedDemands);
+      } catch (error) {
+        console.error('Error loading demands:', error);
+        setDemands([]);
+      }
     }
   }, []);
 
-  // Save events to localStorage
+  // Save events to localStorage whenever events change
   useEffect(() => {
-    localStorage.setItem('lon-events', JSON.stringify(events));
+    if (events.length > 0 || localStorage.getItem('lon-events')) {
+      console.log('Saving events to localStorage:', events);
+      localStorage.setItem('lon-events', JSON.stringify(events));
+    }
   }, [events]);
 
-  // Save demands to localStorage
+  // Save demands to localStorage whenever demands change
   useEffect(() => {
-    localStorage.setItem('lon-demands', JSON.stringify(demands));
+    if (demands.length > 0 || localStorage.getItem('lon-demands')) {
+      console.log('Saving demands to localStorage:', demands);
+      localStorage.setItem('lon-demands', JSON.stringify(demands));
+    }
   }, [demands]);
 
   const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
@@ -46,26 +68,35 @@ export const useEventManager = () => {
       ...eventData,
       id: Date.now().toString(),
       createdAt: new Date(),
-      isPriority: false
+      isPriority: false,
+      isArchived: false
     };
-    setEvents(prev => [...prev, newEvent]);
+    console.log('Adding new event:', newEvent);
+    setEvents(prev => {
+      const updated = [...prev, newEvent];
+      console.log('Updated events:', updated);
+      return updated;
+    });
     return newEvent;
   };
 
   const updateEvent = (id: string, updates: Partial<Event>) => {
-    setEvents(prev => prev.map(event => 
-      event.id === id ? { ...event, ...updates } : event
-    ));
+    console.log('Updating event:', id, updates);
+    setEvents(prev => {
+      const updated = prev.map(event => 
+        event.id === id ? { ...event, ...updates } : event
+      );
+      console.log('Updated events:', updated);
+      return updated;
+    });
   };
 
   const toggleEventPriority = (id: string) => {
     setEvents(prev => prev.map(event => {
       if (event.id === id) {
         if (event.isPriority) {
-          // Remove priority
           return { ...event, isPriority: false, priorityOrder: undefined };
         } else {
-          // Add priority with current timestamp as order
           const maxPriorityOrder = Math.max(
             ...prev.filter(e => e.isPriority).map(e => e.priorityOrder || 0),
             0
@@ -82,34 +113,59 @@ export const useEventManager = () => {
   };
 
   const deleteEvent = (id: string) => {
-    setEvents(prev => prev.filter(event => event.id !== id));
-    setDemands(prev => prev.filter(demand => demand.eventId !== id));
+    console.log('Deleting event:', id);
+    setEvents(prev => {
+      const updated = prev.filter(event => event.id !== id);
+      console.log('Updated events after delete:', updated);
+      return updated;
+    });
+    setDemands(prev => {
+      const updated = prev.filter(demand => demand.eventId !== id);
+      console.log('Updated demands after event delete:', updated);
+      return updated;
+    });
   };
 
   const addDemand = (demandData: Omit<Demand, 'id' | 'createdAt'>) => {
     const newDemand: Demand = {
       ...demandData,
       id: Date.now().toString(),
-      createdAt: new Date()
+      createdAt: new Date(),
+      isCompleted: false,
+      isArchived: false
     };
-    setDemands(prev => [...prev, newDemand]);
+    console.log('Adding new demand:', newDemand);
+    setDemands(prev => {
+      const updated = [...prev, newDemand];
+      console.log('Updated demands:', updated);
+      return updated;
+    });
     return newDemand;
   };
 
   const updateDemand = (id: string, updates: Partial<Demand>) => {
-    setDemands(prev => prev.map(demand => 
-      demand.id === id ? { ...demand, ...updates } : demand
-    ));
+    console.log('Updating demand:', id, updates);
+    setDemands(prev => {
+      const updated = prev.map(demand => 
+        demand.id === id ? { ...demand, ...updates } : demand
+      );
+      console.log('Updated demands:', updated);
+      return updated;
+    });
   };
 
   const deleteDemand = (id: string) => {
-    setDemands(prev => prev.filter(demand => demand.id !== id));
+    console.log('Deleting demand:', id);
+    setDemands(prev => {
+      const updated = prev.filter(demand => demand.id !== id);
+      console.log('Updated demands after delete:', updated);
+      return updated;
+    });
   };
 
   const getActiveEvents = () => {
     const activeEvents = events.filter(event => !event.isArchived);
     
-    // Separate priority and non-priority events
     const priorityEvents = activeEvents
       .filter(event => event.isPriority)
       .sort((a, b) => (a.priorityOrder || 0) - (b.priorityOrder || 0));
@@ -135,45 +191,45 @@ export const useEventManager = () => {
       (eventId ? demand.eventId === eventId : true)
     );
 
-    // Sort by urgency: overdue first, then current, then upcoming
     return activeDemands.sort((a, b) => {
       const getUrgencyScore = (demand: Demand) => {
-        // Usar as funções utilitárias para comparação de datas
         const today = getTodayInBrazil();
         const diffDays = compareDatesIgnoreTime(demand.date, today);
         
-        console.log('useEventManager - Data da demanda:', demand.date);
-        console.log('useEventManager - Diferença em dias:', diffDays);
-        
-        if (diffDays < 0) return 3; // overdue - highest priority
-        if (diffDays <= 3) return 2; // current - medium priority
-        return 1; // upcoming - lowest priority
+        if (diffDays < 0) return 3;
+        if (diffDays <= 3) return 2;
+        return 1;
       };
 
       const scoreA = getUrgencyScore(a);
       const scoreB = getUrgencyScore(b);
       
       if (scoreA !== scoreB) {
-        return scoreB - scoreA; // Higher score first
+        return scoreB - scoreA;
       }
       
-      // If same urgency, sort by date (earliest first)
       return a.date.getTime() - b.date.getTime();
     });
   };
     
   const getCompletedDemands = (eventId?: string) => {
     console.log('getCompletedDemands - Total demands:', demands.length);
-    const completed = demands.filter(demand => 
-      demand.isCompleted === true && 
-      !demand.isArchived &&
-      (eventId ? demand.eventId === eventId : true)
-    );
+    console.log('getCompletedDemands - All demands:', demands);
+    
+    const completed = demands.filter(demand => {
+      const isCompleted = demand.isCompleted === true;
+      const isNotArchived = !demand.isArchived;
+      const matchesEvent = eventId ? demand.eventId === eventId : true;
+      
+      console.log(`Demand ${demand.id}: isCompleted=${isCompleted}, isNotArchived=${isNotArchived}, matchesEvent=${matchesEvent}`);
+      
+      return isCompleted && isNotArchived && matchesEvent;
+    });
+    
     console.log('getCompletedDemands - Completed demands:', completed.length, completed);
     return completed;
   };
 
-  // Função para buscar todos os eventos (ativos e arquivados)
   const getAllEvents = () => {
     return events;
   };

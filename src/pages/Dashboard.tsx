@@ -21,7 +21,8 @@ const Dashboard = () => {
     deleteDemand,
     getActiveEvents,
     getActiveDemands,
-    getCompletedDemands
+    getCompletedDemands,
+    getArchivedEvents
   } = useEventManager();
 
   const [showEventForm, setShowEventForm] = useState(false);
@@ -34,12 +35,16 @@ const Dashboard = () => {
   const activeEvents = getActiveEvents();
   const activeDemands = getActiveDemands();
   const completedDemands = getCompletedDemands();
-  const archivedEvents = 0; // Will implement later
+  const archivedEvents = getArchivedEvents();
 
-  // Ordenar eventos por data (mais recentes primeiro)
-  const sortedEvents = [...activeEvents].sort((a, b) => b.date.getTime() - a.date.getTime());
+  console.log('Dashboard - Active events:', activeEvents.length);
+  console.log('Dashboard - Active demands:', activeDemands.length);
+  console.log('Dashboard - Completed demands:', completedDemands.length);
+  console.log('Dashboard - Archived events:', archivedEvents.length);
 
   const handleEventSubmit = (data: EventFormData) => {
+    console.log('Dashboard - Submitting event:', data);
+    
     if (editingEvent) {
       updateEvent(editingEvent.id, {
         name: data.name,
@@ -67,6 +72,8 @@ const Dashboard = () => {
   };
 
   const handleDemandSubmit = (data: DemandFormData) => {
+    console.log('Dashboard - Submitting demand:', data);
+    
     if (editingDemand) {
       updateDemand(editingDemand.id, data);
       setEditingDemand(null);
@@ -89,6 +96,7 @@ const Dashboard = () => {
   };
 
   const handleAddDemand = (eventId: string) => {
+    console.log('Dashboard - Adding demand for event:', eventId);
     setSelectedEventId(eventId);
     setShowDemandForm(true);
   };
@@ -104,6 +112,7 @@ const Dashboard = () => {
   };
 
   const handleArchiveEvent = (id: string) => {
+    console.log('Dashboard - Archiving event:', id);
     updateEvent(id, { isArchived: true });
     toast({
       title: "Evento arquivado",
@@ -112,7 +121,7 @@ const Dashboard = () => {
   };
 
   const handleCompleteDemand = (id: string) => {
-    console.log('Dashboard: Completing demand with ID:', id);
+    console.log('Dashboard - Completing demand:', id);
     updateDemand(id, { isCompleted: true });
     toast({
       title: "Demanda concluída",
@@ -139,7 +148,7 @@ const Dashboard = () => {
         totalEvents={activeEvents.length}
         pendingDemands={activeDemands.length}
         completedDemands={completedDemands.length}
-        archivedEvents={archivedEvents}
+        archivedEvents={archivedEvents.length}
       />
       
       <div className="pt-24">
