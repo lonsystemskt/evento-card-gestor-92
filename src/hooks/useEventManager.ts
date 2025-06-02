@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Event, Demand } from '@/types';
 import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
@@ -120,7 +121,12 @@ export const useEventManager = () => {
     return [...priorityEvents, ...normalEvents];
   };
 
-  const getArchivedEvents = () => events.filter(event => event.isArchived);
+  const getArchivedEvents = () => {
+    console.log('getArchivedEvents - Total events:', events.length);
+    const archived = events.filter(event => event.isArchived === true);
+    console.log('getArchivedEvents - Archived events:', archived.length, archived);
+    return archived;
+  };
   
   const getActiveDemands = (eventId?: string) => {
     const activeDemands = demands.filter(demand => 
@@ -156,12 +162,21 @@ export const useEventManager = () => {
     });
   };
     
-  const getCompletedDemands = (eventId?: string) => 
-    demands.filter(demand => 
-      demand.isCompleted && 
+  const getCompletedDemands = (eventId?: string) => {
+    console.log('getCompletedDemands - Total demands:', demands.length);
+    const completed = demands.filter(demand => 
+      demand.isCompleted === true && 
       !demand.isArchived &&
       (eventId ? demand.eventId === eventId : true)
     );
+    console.log('getCompletedDemands - Completed demands:', completed.length, completed);
+    return completed;
+  };
+
+  // Função para buscar todos os eventos (ativos e arquivados)
+  const getAllEvents = () => {
+    return events;
+  };
 
   return {
     events,
@@ -176,6 +191,7 @@ export const useEventManager = () => {
     getActiveEvents,
     getArchivedEvents,
     getActiveDemands,
-    getCompletedDemands
+    getCompletedDemands,
+    getAllEvents
   };
 };

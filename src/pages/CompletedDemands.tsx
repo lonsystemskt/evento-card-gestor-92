@@ -7,15 +7,18 @@ import { useToast } from '@/hooks/use-toast';
 
 const CompletedDemands = () => {
   const { 
-    getActiveEvents, 
+    getAllEvents, 
     getCompletedDemands, 
     updateDemand, 
     deleteDemand 
   } = useEventManager();
   
   const { toast } = useToast();
-  const activeEvents = getActiveEvents();
+  const allEvents = getAllEvents(); // Buscar todos os eventos, não apenas os ativos
   const completedDemands = getCompletedDemands();
+
+  console.log('CompletedDemands - All events:', allEvents.length);
+  console.log('CompletedDemands - Completed demands:', completedDemands.length);
 
   const handleRestore = (id: string) => {
     updateDemand(id, { isCompleted: false });
@@ -36,11 +39,11 @@ const CompletedDemands = () => {
   };
 
   const getEventName = (eventId: string) => {
-    const event = activeEvents.find(e => e.id === eventId);
+    const event = allEvents.find(e => e.id === eventId);
     return event?.name || 'Evento não encontrado';
   };
 
-  const groupedDemands = activeEvents.reduce((acc, event) => {
+  const groupedDemands = allEvents.reduce((acc, event) => {
     const eventDemands = completedDemands.filter(demand => demand.eventId === event.id);
     if (eventDemands.length > 0) {
       acc[event.id] = {
@@ -50,6 +53,8 @@ const CompletedDemands = () => {
     }
     return acc;
   }, {} as Record<string, { event: any, demands: any[] }>);
+
+  console.log('CompletedDemands - Grouped demands:', Object.keys(groupedDemands).length);
 
   return (
     <div className="min-h-screen w-full">

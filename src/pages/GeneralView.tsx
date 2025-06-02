@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, CheckCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import DemandForm from '@/components/DemandForm';
 import { useEventManager } from '@/hooks/useEventManager';
@@ -71,6 +71,15 @@ const GeneralView = () => {
     toast({
       title: "Demanda excluída",
       description: "A demanda foi excluída com sucesso.",
+    });
+  };
+
+  const handleCompleteDemand = (demandId: string) => {
+    console.log('GeneralView: Completing demand with ID:', demandId);
+    updateDemand(demandId, { isCompleted: true });
+    toast({
+      title: "Demanda concluída",
+      description: "A demanda foi marcada como concluída.",
     });
   };
 
@@ -148,6 +157,13 @@ const GeneralView = () => {
                         title="Editar demanda"
                       >
                         <Edit size={14} className="text-blue-300" />
+                      </button>
+                      <button
+                        onClick={() => handleCompleteDemand(demand.id)}
+                        className="glass-button p-2 rounded-lg hover:bg-green-500/30 transition-all duration-200"
+                        title="Marcar como concluída"
+                      >
+                        <CheckCircle size={14} className="text-green-300" />
                       </button>
                       <button
                         onClick={() => setDeletingDemandId(demand.id)}
