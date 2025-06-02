@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { NoteFormData } from '@/types';
+import { createLocalDate } from '@/utils/dateUtils';
 
 interface NoteFormProps {
   onSubmit: (data: NoteFormData) => void;
@@ -46,8 +46,13 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, initialData }) 
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Criar uma nova data no horário local para evitar problemas de fuso horário
-      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      console.log('NoteForm - Data selecionada:', date);
+      
+      // Usar a função utilitária para criar data local do Brasil
+      const localDate = createLocalDate(date);
+      
+      console.log('NoteForm - Data convertida:', localDate);
+      
       setFormData(prev => ({ ...prev, priorityDate: localDate }));
       setIsCalendarOpen(false);
     }

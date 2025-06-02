@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CRMFormData } from '@/types';
+import { createLocalDate } from '@/utils/dateUtils';
 
 interface CRMFormProps {
   onSubmit: (data: CRMFormData) => void;
@@ -40,8 +40,13 @@ const CRMForm: React.FC<CRMFormProps> = ({ onSubmit, onCancel, initialData }) =>
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Criar uma nova data no horário local para evitar problemas de fuso horário
-      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      console.log('CRMForm - Data selecionada:', date);
+      
+      // Usar a função utilitária para criar data local do Brasil
+      const localDate = createLocalDate(date);
+      
+      console.log('CRMForm - Data convertida:', localDate);
+      
       setFormData(prev => ({ ...prev, priorityDate: localDate }));
       setIsCalendarOpen(false);
     }

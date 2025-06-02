@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Event, Demand } from '@/types';
+import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
 
 export const useEventManager = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -132,11 +132,12 @@ export const useEventManager = () => {
     // Sort by urgency: overdue first, then current, then upcoming
     return activeDemands.sort((a, b) => {
       const getUrgencyScore = (demand: Demand) => {
-        // Usar apenas a data sem horário para comparação
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const demandDate = new Date(demand.date.getFullYear(), demand.date.getMonth(), demand.date.getDate());
-        const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+        // Usar as funções utilitárias para comparação de datas
+        const today = getTodayInBrazil();
+        const diffDays = compareDatesIgnoreTime(demand.date, today);
+        
+        console.log('useEventManager - Data da demanda:', demand.date);
+        console.log('useEventManager - Diferença em dias:', diffDays);
         
         if (diffDays < 0) return 3; // overdue - highest priority
         if (diffDays <= 3) return 2; // current - medium priority

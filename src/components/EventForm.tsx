@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Calendar as CalendarIcon, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Event, EventFormData } from '@/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { createLocalDate } from '@/utils/dateUtils';
 
 interface EventFormProps {
   isOpen: boolean;
@@ -88,8 +88,14 @@ const EventForm: React.FC<EventFormProps> = ({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Criar uma nova data no horário local para evitar problemas de fuso horário
-      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      console.log('EventForm - Data selecionada:', date);
+      
+      // Usar a função utilitária para criar data local do Brasil
+      const localDate = createLocalDate(date);
+      
+      console.log('EventForm - Data convertida:', localDate);
+      console.log('EventForm - Data formatada:', localDate.toLocaleDateString('pt-BR'));
+      
       setFormData(prev => ({ ...prev, date: localDate }));
       setDatePickerOpen(false);
     }

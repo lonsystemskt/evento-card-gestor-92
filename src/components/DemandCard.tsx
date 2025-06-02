@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
 import { Demand, DemandStatus } from '@/types';
+import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
 
 interface DemandCardProps {
   demand: Demand;
@@ -17,11 +17,13 @@ const DemandCard: React.FC<DemandCardProps> = ({
   onComplete
 }) => {
   const getStatus = (): DemandStatus => {
-    // Usar apenas a data sem horário para comparação
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const demandDate = new Date(demand.date.getFullYear(), demand.date.getMonth(), demand.date.getDate());
-    const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    // Usar as funções utilitárias para comparação de datas
+    const today = getTodayInBrazil();
+    const diffDays = compareDatesIgnoreTime(demand.date, today);
+    
+    console.log('DemandCard - Data da demanda:', demand.date);
+    console.log('DemandCard - Data de hoje:', today);
+    console.log('DemandCard - Diferença em dias:', diffDays);
     
     if (diffDays < 0) return 'overdue';
     if (diffDays <= 3) return 'current';
