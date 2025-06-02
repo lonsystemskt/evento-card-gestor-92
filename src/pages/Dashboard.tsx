@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import Header from '@/components/Header';
@@ -7,6 +8,7 @@ import EventForm from '@/components/EventForm';
 import DemandForm from '@/components/DemandForm';
 import { useEventManager } from '@/hooks/useEventManager';
 import { Event, Demand, EventFormData, DemandFormData } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const {
@@ -27,6 +29,7 @@ const Dashboard = () => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editingDemand, setEditingDemand] = useState<Demand | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const { toast } = useToast();
 
   const activeEvents = getActiveEvents();
   const activeDemands = getActiveDemands();
@@ -44,6 +47,10 @@ const Dashboard = () => {
         logo: data.logo ? URL.createObjectURL(data.logo) : editingEvent.logo
       });
       setEditingEvent(null);
+      toast({
+        title: "Evento atualizado",
+        description: "O evento foi atualizado com sucesso.",
+      });
     } else {
       addEvent({
         name: data.name,
@@ -52,6 +59,10 @@ const Dashboard = () => {
         isArchived: false,
         isPriority: false
       });
+      toast({
+        title: "Evento criado",
+        description: "O evento foi criado com sucesso.",
+      });
     }
   };
 
@@ -59,12 +70,20 @@ const Dashboard = () => {
     if (editingDemand) {
       updateDemand(editingDemand.id, data);
       setEditingDemand(null);
+      toast({
+        title: "Demanda atualizada",
+        description: "A demanda foi atualizada com sucesso.",
+      });
     } else {
       addDemand({
         ...data,
         eventId: selectedEventId,
         isCompleted: false,
         isArchived: false
+      });
+      toast({
+        title: "Demanda criada",
+        description: "A demanda foi criada com sucesso.",
       });
     }
   };
@@ -86,10 +105,19 @@ const Dashboard = () => {
 
   const handleArchiveEvent = (id: string) => {
     updateEvent(id, { isArchived: true });
+    toast({
+      title: "Evento arquivado",
+      description: "O evento foi arquivado com sucesso.",
+    });
   };
 
   const handleCompleteDemand = (id: string) => {
+    console.log('Dashboard: Completing demand with ID:', id);
     updateDemand(id, { isCompleted: true });
+    toast({
+      title: "Demanda concluída",
+      description: "A demanda foi marcada como concluída.",
+    });
   };
 
   const closeEventForm = () => {

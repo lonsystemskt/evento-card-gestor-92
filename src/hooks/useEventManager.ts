@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Event, Demand } from '@/types';
 
@@ -132,7 +133,9 @@ export const useEventManager = () => {
     return activeDemands.sort((a, b) => {
       const getUrgencyScore = (demand: Demand) => {
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
         const demandDate = new Date(demand.date);
+        demandDate.setHours(0, 0, 0, 0);
         const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
         
         if (diffDays < 0) return 3; // overdue - highest priority
@@ -155,6 +158,7 @@ export const useEventManager = () => {
   const getCompletedDemands = (eventId?: string) => 
     demands.filter(demand => 
       demand.isCompleted && 
+      !demand.isArchived &&
       (eventId ? demand.eventId === eventId : true)
     );
 

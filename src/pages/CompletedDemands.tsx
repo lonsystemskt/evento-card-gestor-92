@@ -3,6 +3,7 @@ import React from 'react';
 import { RotateCcw, Trash2, AlertCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import { useEventManager } from '@/hooks/useEventManager';
+import { useToast } from '@/hooks/use-toast';
 
 const CompletedDemands = () => {
   const { 
@@ -12,16 +13,25 @@ const CompletedDemands = () => {
     deleteDemand 
   } = useEventManager();
   
+  const { toast } = useToast();
   const activeEvents = getActiveEvents();
   const completedDemands = getCompletedDemands();
 
   const handleRestore = (id: string) => {
     updateDemand(id, { isCompleted: false });
+    toast({
+      title: "Demanda restaurada",
+      description: "A demanda foi restaurada para pendente.",
+    });
   };
 
   const handlePermanentDelete = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir permanentemente esta demanda? Esta ação não pode ser desfeita.')) {
       deleteDemand(id);
+      toast({
+        title: "Demanda excluída",
+        description: "A demanda foi excluída permanentemente.",
+      });
     }
   };
 
@@ -35,7 +45,7 @@ const CompletedDemands = () => {
     if (eventDemands.length > 0) {
       acc[event.id] = {
         event,
-        demands: eventDemands
+        demands: eventDemands.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       };
     }
     return acc;
@@ -99,7 +109,7 @@ const CompletedDemands = () => {
                           </div>
                           <p className="text-blue-200/70 text-sm mb-2">{demand.subject}</p>
                           <p className="text-blue-300 text-xs">
-                            Concluída em: {demand.date.toLocaleDateString('pt-BR')}
+                            Prazo original: {demand.date.toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                         
@@ -107,6 +117,7 @@ const CompletedDemands = () => {
                           <button
                             onClick={() => handleRestore(demand.id)}
                             className="glass-button p-2 rounded-lg hover:bg-blue-500/30 transition-all"
+                            title="Restaurar demanda"
                           >
                             <RotateCcw size={14} className="text-blue-300" />
                           </button>
@@ -114,6 +125,7 @@ const CompletedDemands = () => {
                           <button
                             onClick={() => handlePermanentDelete(demand.id)}
                             className="glass-button p-2 rounded-lg hover:bg-red-500/30 transition-all"
+                            title="Excluir permanentemente"
                           >
                             <Trash2 size={14} className="text-red-300" />
                           </button>

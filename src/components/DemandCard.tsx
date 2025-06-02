@@ -18,7 +18,9 @@ const DemandCard: React.FC<DemandCardProps> = ({
 }) => {
   const getStatus = (): DemandStatus => {
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const demandDate = new Date(demand.date);
+    demandDate.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
     
     if (diffDays < 0) return 'overdue';
@@ -36,6 +38,13 @@ const DemandCard: React.FC<DemandCardProps> = ({
 
   const truncateText = (text: string, maxLength: number = 30) => {
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+  };
+
+  const handleComplete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Completing demand:', demand.id);
+    onComplete(demand.id);
   };
 
   const status = getStatus();
@@ -62,7 +71,11 @@ const DemandCard: React.FC<DemandCardProps> = ({
         
         <div className="flex flex-col space-y-1 flex-shrink-0">
           <button
-            onClick={() => onEdit(demand)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEdit(demand);
+            }}
             className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
             title="Editar demanda"
           >
@@ -70,7 +83,7 @@ const DemandCard: React.FC<DemandCardProps> = ({
           </button>
           
           <button
-            onClick={() => onComplete(demand.id)}
+            onClick={handleComplete}
             className="p-1.5 hover:bg-green-500/20 rounded transition-colors"
             title="Marcar como concluída"
           >
@@ -78,7 +91,11 @@ const DemandCard: React.FC<DemandCardProps> = ({
           </button>
           
           <button
-            onClick={() => onDelete(demand.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDelete(demand.id);
+            }}
             className="p-1.5 hover:bg-red-500/20 rounded transition-colors"
             title="Excluir demanda"
           >
