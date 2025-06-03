@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
-import { Demand, DemandStatus } from '@/types';
+import { Demand } from '@/types';
 import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
 
 interface DemandCardProps {
@@ -16,26 +17,13 @@ const DemandCard: React.FC<DemandCardProps> = ({
   onDelete,
   onComplete
 }) => {
-  const getStatus = (): DemandStatus => {
-    // Usar as funções utilitárias para comparação de datas
+  const getUrgencyLevel = () => {
     const today = getTodayInBrazil();
     const diffDays = compareDatesIgnoreTime(demand.date, today);
     
-    console.log('DemandCard - Data da demanda:', demand.date);
-    console.log('DemandCard - Data de hoje:', today);
-    console.log('DemandCard - Diferença em dias:', diffDays);
-    
-    if (diffDays < 0) return 'overdue';
-    if (diffDays <= 3) return 'current';
-    return 'upcoming';
-  };
-
-  const getStatusColor = (status: DemandStatus) => {
-    switch (status) {
-      case 'overdue': return 'bg-red-500';
-      case 'current': return 'bg-orange-500';
-      case 'upcoming': return 'bg-green-500';
-    }
+    if (diffDays < 0) return { level: 'overdue', color: 'bg-red-500' };
+    if (diffDays <= 3) return { level: 'urgent', color: 'bg-orange-500' };
+    return { level: 'normal', color: 'bg-green-500' };
   };
 
   const truncateText = (text: string, maxLength: number = 30) => {
@@ -45,18 +33,18 @@ const DemandCard: React.FC<DemandCardProps> = ({
   const handleComplete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Completing demand:', demand.id);
+    console.log('✅ Concluindo demanda:', demand.id);
     onComplete(demand.id);
   };
 
-  const status = getStatus();
+  const urgency = getUrgencyLevel();
 
   return (
     <div className="w-[240px] lg:w-[260px] h-[100px] glass-card rounded-lg p-3 flex-shrink-0 relative hover:bg-white/10 transition-all duration-200">
       <div className="flex items-start justify-between h-full">
         <div className="flex-1 min-w-0 pr-2">
           <div className="flex items-center space-x-2 mb-2">
-            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusColor(status)}`}></div>
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${urgency.color}`}></div>
             <h4 className="text-sm font-medium text-white truncate" title={demand.title}>
               {truncateText(demand.title, 25)}
             </h4>

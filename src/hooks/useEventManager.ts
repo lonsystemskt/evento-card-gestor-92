@@ -1,22 +1,28 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Event, Demand } from '@/types';
 import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
+
+// Chaves do localStorage
+const EVENTS_KEY = 'lon-events-v2';
+const DEMANDS_KEY = 'lon-demands-v2';
+const SYNC_INTERVAL = 5000; // 5 segundos
 
 export const useEventManager = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [demands, setDemands] = useState<Demand[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedEvents = localStorage.getItem('lon-events');
-    const savedDemands = localStorage.getItem('lon-demands');
+  // Função para carregar dados do localStorage
+  const loadFromStorage = useCallback(() => {
+    console.log('🔄 Carregando dados do localStorage...');
     
-    console.log('Loading data from localStorage...');
-    
-    if (savedEvents) {
-      try {
+    try {
+      const savedEvents = localStorage.getItem(EVENTS_KEY);
+      const savedDemands = localStorage.getItem(DEMANDS_KEY);
+      
+      if (savedEvents) {
         const parsedEvents = JSON.parse(savedEvents).map((event: any) => ({
           ...event,
           date: new Date(event.date),
@@ -24,16 +30,13 @@ export const useEventManager = () => {
           isArchived: Boolean(event.isArchived),
           isPriority: Boolean(event.isPriority)
         }));
-        console.log('Loaded events from localStorage:', parsedEvents);
+        console.log('📅 Eventos carregados:', parsedEvents.length);
         setEvents(parsedEvents);
-      } catch (error) {
-        console.error('Error loading events:', error);
+      } else {
         setEvents([]);
       }
-    }
-    
-    if (savedDemands) {
-      try {
+      
+      if (savedDemands) {
         const parsedDemands = JSON.parse(savedDemands).map((demand: any) => ({
           ...demand,
           date: new Date(demand.date),
@@ -41,32 +44,77 @@ export const useEventManager = () => {
           isCompleted: Boolean(demand.isCompleted),
           isArchived: Boolean(demand.isArchived)
         }));
-        console.log('Loaded demands from localStorage:', parsedDemands);
+        console.log('📋 Demandas carregadas:', parsedDemands.length);
         setDemands(parsedDemands);
-      } catch (error) {
-        console.error('Error loading demands:', error);
+      } else {
         setDemands([]);
       }
+      
+      setLastUpdate(Date.now());
+    } catch (error) {
+      console.error('❌ Erro ao carregar dados:', error);
+      setEvents([]);
+      setDemands([]);
     }
-    
-    setIsLoaded(true);
   }, []);
 
-  // Save events to localStorage whenever events change, but only after initial load
+  // Função para salvar dados no localStorage
+  const saveToStorage = useCallback((newEvents: Event[], newDemands: Demand[]) => {
+    if (!isLoaded) return;
+    
+    console.log('💾 Salvando dados no localStorage...');
+    console.log('📅 Eventos a salvar:', newEvents.length);
+    console.log('📋 Demandas a salvar:', newDemands.length);
+    
+    localStorage.setItem(EVENTS_KEY, JSON.stringify(newEvents));
+    localStorage.setItem(DEMANDS_KEY, JSON.stringify(newDemands));
+    setLastUpdate(Date.now());
+  }, [isLoaded]);
+
+  // Carregamento inicial
+  useEffect(() => {
+    loadFromStorage();
+    setIsLoaded(true);
+  }, [loadFromStorage]);
+
+  // Sincronização automática a cada 5 segundos
   useEffect(() => {
     if (!isLoaded) return;
-    console.log('Saving events to localStorage:', events);
-    localStorage.setItem('lon-events', JSON.stringify(events));
-  }, [events, isLoaded]);
 
-  // Save demands to localStorage whenever demands change, but only after initial load
+    const syncInterval = setInterval(() => {
+      console.log('🔄 Sincronização automática - verificando atualizações...');
+      
+      const savedEvents = localStorage.getItem(EVENTS_KEY);
+      const savedDemands = localStorage.getItem(DEMANDS_KEY);
+      
+      if (savedEvents && savedDemands) {
+        try {
+          const currentEvents = JSON.parse(savedEvents);
+          const currentDemands = JSON.parse(savedDemands);
+          
+          // Verificar se há mudanças
+          if (JSON.stringify(currentEvents) !== JSON.stringify(events) || 
+              JSON.stringify(currentDemands) !== JSON.stringify(demands)) {
+            console.log('🔄 Detectadas mudanças - atualizando estado...');
+            loadFromStorage();
+          }
+        } catch (error) {
+          console.error('❌ Erro na sincronização:', error);
+        }
+      }
+    }, SYNC_INTERVAL);
+
+    return () => clearInterval(syncInterval);
+  }, [isLoaded, events, demands, loadFromStorage]);
+
+  // Salvar eventos quando alterados
   useEffect(() => {
-    if (!isLoaded) return;
-    console.log('Saving demands to localStorage:', demands);
-    localStorage.setItem('lon-demands', JSON.stringify(demands));
-  }, [demands, isLoaded]);
+    if (isLoaded && events.length >= 0) {
+      saveToStorage(events, demands);
+    }
+  }, [events, demands, saveToStorage, isLoaded]);
 
-  const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
+  const addEvent = useCallback((eventData: Omit<Event, 'id' | 'createdAt'>) => {
     const newEvent: Event = {
       ...eventData,
       id: Date.now().toString(),
@@ -74,28 +122,34 @@ export const useEventManager = () => {
       isPriority: false,
       isArchived: false
     };
-    console.log('Adding new event:', newEvent);
-    setEvents(prev => [...prev, newEvent]);
-    return newEvent;
-  };
-
-  const updateEvent = (id: string, updates: Partial<Event>) => {
-    console.log('Updating event:', id, 'with updates:', updates);
+    
+    console.log('➕ Adicionando novo evento:', newEvent.name);
     setEvents(prev => {
-      const updated = prev.map(event => {
-        if (event.id === id) {
-          const updatedEvent = { ...event, ...updates };
-          console.log('Event updated from:', event, 'to:', updatedEvent);
-          return updatedEvent;
-        }
-        return event;
-      });
-      console.log('All events after update:', updated);
+      const updated = [...prev, newEvent];
       return updated;
     });
-  };
+    
+    return newEvent;
+  }, []);
 
-  const toggleEventPriority = (id: string) => {
+  const updateEvent = useCallback((id: string, updates: Partial<Event>) => {
+    console.log('✏️ Atualizando evento:', id, updates);
+    setEvents(prev => {
+      const updated = prev.map(event => 
+        event.id === id ? { ...event, ...updates } : event
+      );
+      return updated;
+    });
+  }, []);
+
+  const deleteEvent = useCallback((id: string) => {
+    console.log('🗑️ Deletando evento:', id);
+    setEvents(prev => prev.filter(event => event.id !== id));
+    setDemands(prev => prev.filter(demand => demand.eventId !== id));
+  }, []);
+
+  const toggleEventPriority = useCallback((id: string) => {
+    console.log('⭐ Alternando prioridade do evento:', id);
     setEvents(prev => prev.map(event => {
       if (event.id === id) {
         if (event.isPriority) {
@@ -114,15 +168,9 @@ export const useEventManager = () => {
       }
       return event;
     }));
-  };
+  }, []);
 
-  const deleteEvent = (id: string) => {
-    console.log('Deleting event:', id);
-    setEvents(prev => prev.filter(event => event.id !== id));
-    setDemands(prev => prev.filter(demand => demand.eventId !== id));
-  };
-
-  const addDemand = (demandData: Omit<Demand, 'id' | 'createdAt'>) => {
+  const addDemand = useCallback((demandData: Omit<Demand, 'id' | 'createdAt'>) => {
     const newDemand: Demand = {
       ...demandData,
       id: Date.now().toString(),
@@ -130,41 +178,33 @@ export const useEventManager = () => {
       isCompleted: false,
       isArchived: false
     };
-    console.log('Adding new demand:', newDemand);
-    setDemands(prev => [...prev, newDemand]);
-    return newDemand;
-  };
-
-  const updateDemand = (id: string, updates: Partial<Demand>) => {
-    console.log('Updating demand:', id, 'with updates:', updates);
+    
+    console.log('➕ Adicionando nova demanda:', newDemand.title);
     setDemands(prev => {
-      const updated = prev.map(demand => {
-        if (demand.id === id) {
-          const updatedDemand = { ...demand, ...updates };
-          console.log('Demand updated from:', demand, 'to:', updatedDemand);
-          return updatedDemand;
-        }
-        return demand;
-      });
-      console.log('All demands after update:', updated);
+      const updated = [...prev, newDemand];
       return updated;
     });
-  };
-
-  const deleteDemand = (id: string) => {
-    console.log('Deleting demand:', id);
-    setDemands(prev => prev.filter(demand => demand.id !== id));
-  };
-
-  const getActiveEvents = () => {
-    console.log('Getting active events - filtering from:', events.length, 'events');
-    const activeEvents = events.filter(event => {
-      const isActive = !event.isArchived;
-      console.log(`Event ${event.id} (${event.name}): isArchived=${event.isArchived}, isActive=${isActive}`);
-      return isActive;
-    });
     
-    console.log('Active events found:', activeEvents.length);
+    return newDemand;
+  }, []);
+
+  const updateDemand = useCallback((id: string, updates: Partial<Demand>) => {
+    console.log('✏️ Atualizando demanda:', id, updates);
+    setDemands(prev => {
+      const updated = prev.map(demand => 
+        demand.id === id ? { ...demand, ...updates } : demand
+      );
+      return updated;
+    });
+  }, []);
+
+  const deleteDemand = useCallback((id: string) => {
+    console.log('🗑️ Deletando demanda:', id);
+    setDemands(prev => prev.filter(demand => demand.id !== id));
+  }, []);
+
+  const getActiveEvents = useCallback(() => {
+    const activeEvents = events.filter(event => !event.isArchived);
     
     const priorityEvents = activeEvents
       .filter(event => event.isPriority)
@@ -175,38 +215,27 @@ export const useEventManager = () => {
       .sort((a, b) => b.date.getTime() - a.date.getTime());
     
     return [...priorityEvents, ...normalEvents];
-  };
+  }, [events]);
 
-  const getArchivedEvents = () => {
-    console.log('Getting archived events - filtering from:', events.length, 'events');
-    const archived = events.filter(event => {
-      const isArchived = event.isArchived === true;
-      console.log(`Event ${event.id} (${event.name}): isArchived=${event.isArchived}, willShow=${isArchived}`);
-      return isArchived;
-    });
-    console.log('Archived events found:', archived.length);
-    return archived;
-  };
+  const getArchivedEvents = useCallback(() => {
+    return events.filter(event => event.isArchived);
+  }, [events]);
   
-  const getActiveDemands = (eventId?: string) => {
-    console.log('Getting active demands - filtering from:', demands.length, 'demands');
+  const getActiveDemands = useCallback((eventId?: string) => {
     const activeDemands = demands.filter(demand => {
       const isActive = !demand.isCompleted && !demand.isArchived;
       const matchesEvent = eventId ? demand.eventId === eventId : true;
-      console.log(`Demand ${demand.id} (${demand.title}): isCompleted=${demand.isCompleted}, isArchived=${demand.isArchived}, isActive=${isActive}, matchesEvent=${matchesEvent}`);
       return isActive && matchesEvent;
     });
-
-    console.log('Active demands found:', activeDemands.length);
 
     return activeDemands.sort((a, b) => {
       const getUrgencyScore = (demand: Demand) => {
         const today = getTodayInBrazil();
         const diffDays = compareDatesIgnoreTime(demand.date, today);
         
-        if (diffDays < 0) return 3;
-        if (diffDays <= 3) return 2;
-        return 1;
+        if (diffDays < 0) return 3; // Atrasadas
+        if (diffDays <= 3) return 2; // Urgentes
+        return 1; // Futuras
       };
 
       const scoreA = getUrgencyScore(a);
@@ -218,27 +247,23 @@ export const useEventManager = () => {
       
       return a.date.getTime() - b.date.getTime();
     });
-  };
+  }, [demands]);
     
-  const getCompletedDemands = (eventId?: string) => {
-    console.log('Getting completed demands - filtering from:', demands.length, 'demands');
+  const getCompletedDemands = useCallback((eventId?: string) => {
     const completed = demands.filter(demand => {
       const isCompleted = demand.isCompleted === true;
       const isNotArchived = !demand.isArchived;
       const matchesEvent = eventId ? demand.eventId === eventId : true;
       
-      console.log(`Demand ${demand.id} (${demand.title}): isCompleted=${demand.isCompleted}, isArchived=${demand.isArchived}, isCompleted=${isCompleted}, isNotArchived=${isNotArchived}, matchesEvent=${matchesEvent}`);
-      
       return isCompleted && isNotArchived && matchesEvent;
     });
     
-    console.log('Completed demands found:', completed.length);
     return completed.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  };
+  }, [demands]);
 
-  const getAllEvents = () => {
+  const getAllEvents = useCallback(() => {
     return events;
-  };
+  }, [events]);
 
   return {
     events,
@@ -254,6 +279,7 @@ export const useEventManager = () => {
     getArchivedEvents,
     getActiveDemands,
     getCompletedDemands,
-    getAllEvents
+    getAllEvents,
+    lastUpdate
   };
 };

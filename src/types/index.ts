@@ -39,8 +39,6 @@ export interface Note {
   createdAt: Date;
 }
 
-export type DemandStatus = 'overdue' | 'current' | 'upcoming';
-
 export interface EventFormData {
   name: string;
   logo?: File;

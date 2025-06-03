@@ -28,7 +28,8 @@ const GeneralView = () => {
     getActiveEvents, 
     getActiveDemands, 
     updateDemand, 
-    deleteDemand 
+    deleteDemand,
+    lastUpdate
   } = useEventManager();
   
   const [editingDemand, setEditingDemand] = useState<Demand | null>(null);
@@ -37,6 +38,10 @@ const GeneralView = () => {
 
   const events = getActiveEvents();
   const allDemands = getActiveDemands();
+
+  console.log('🌐 GeneralView - Última atualização:', new Date(lastUpdate).toLocaleTimeString());
+  console.log('📅 Eventos:', events.length);
+  console.log('📋 Demandas totais:', allDemands.length);
 
   const getEventById = (eventId: string): Event | undefined => {
     return events.find(event => event.id === eventId);
@@ -75,7 +80,7 @@ const GeneralView = () => {
   };
 
   const handleCompleteDemand = (demandId: string) => {
-    console.log('GeneralView: Completing demand with ID:', demandId);
+    console.log('✅ Concluindo demanda:', demandId);
     updateDemand(demandId, { isCompleted: true });
     toast({
       title: "Demanda concluída",
@@ -93,8 +98,11 @@ const GeneralView = () => {
             <h2 className="text-2xl font-bold text-white mb-4 text-left">
               Visão Geral - Todas as Demandas
             </h2>
-            <p className="text-blue-200/70 text-left">
+            <p className="text-blue-200/70 text-left mb-2">
               Visualize todas as demandas do sistema organizadas por evento
+            </p>
+            <p className="text-xs text-blue-200/50">
+              Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
             </p>
           </div>
 

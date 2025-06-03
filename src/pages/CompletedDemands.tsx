@@ -10,18 +10,20 @@ const CompletedDemands = () => {
     getAllEvents, 
     getCompletedDemands, 
     updateDemand, 
-    deleteDemand 
+    deleteDemand,
+    lastUpdate
   } = useEventManager();
   
   const { toast } = useToast();
   const allEvents = getAllEvents();
   const completedDemands = getCompletedDemands();
 
-  console.log('CompletedDemands - All events:', allEvents.length);
-  console.log('CompletedDemands - Completed demands:', completedDemands.length);
+  console.log('✅ CompletedDemands - Eventos:', allEvents.length);
+  console.log('✅ CompletedDemands - Demandas concluídas:', completedDemands.length);
+  console.log('✅ CompletedDemands - Última atualização:', new Date(lastUpdate).toLocaleTimeString());
 
   const handleRestore = (id: string) => {
-    console.log('CompletedDemands - Restoring demand:', id);
+    console.log('🔄 Restaurando demanda:', id);
     updateDemand(id, { isCompleted: false });
     toast({
       title: "Demanda restaurada",
@@ -31,7 +33,7 @@ const CompletedDemands = () => {
 
   const handlePermanentDelete = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir permanentemente esta demanda? Esta ação não pode ser desfeita.')) {
-      console.log('CompletedDemands - Permanently deleting demand:', id);
+      console.log('🗑️ Excluindo permanentemente demanda:', id);
       deleteDemand(id);
       toast({
         title: "Demanda excluída",
@@ -56,7 +58,7 @@ const CompletedDemands = () => {
     return acc;
   }, {} as Record<string, { event: any, demands: any[] }>);
 
-  console.log('CompletedDemands - Grouped demands:', Object.keys(groupedDemands).length);
+  console.log('✅ CompletedDemands - Grupos de demandas:', Object.keys(groupedDemands).length);
 
   return (
     <div className="min-h-screen w-full">
@@ -65,7 +67,10 @@ const CompletedDemands = () => {
       <div className="pt-24 px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Demandas Concluídas</h1>
-          <p className="text-blue-200/70">Gerencie suas demandas concluídas organizadas por evento</p>
+          <p className="text-blue-200/70 mb-1">Gerencie suas demandas concluídas organizadas por evento</p>
+          <p className="text-xs text-blue-200/50">
+            Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+          </p>
         </div>
 
         {Object.keys(groupedDemands).length === 0 ? (

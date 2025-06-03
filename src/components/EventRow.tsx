@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, MoreVertical, Edit, Archive, Trash2, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { Event, Demand } from '@/types';
@@ -9,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
 
 interface EventRowProps {
   event: Event;
@@ -106,6 +106,26 @@ const EventRow: React.FC<EventRowProps> = ({
     return false;
   };
 
+  const getDemandUrgency = (demand: Demand) => {
+    const today = getTodayInBrazil();
+    const diffDays = compareDatesIgnoreTime(demand.date, today);
+    
+    if (diffDays < 0) return 0; // Atrasadas (mais urgentes)
+    if (diffDays <= 3) return 1; // Urgentes
+    return 2; // Normais
+  };
+
+  const sortedDemands = [...demands].sort((a, b) => {
+    const urgencyA = getDemandUrgency(a);
+    const urgencyB = getDemandUrgency(b);
+    
+    if (urgencyA !== urgencyB) {
+      return urgencyA - urgencyB;
+    }
+    
+    return a.date.getTime() - b.date.getTime();
+  });
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isNearActionIcons(e.clientX, e.clientY)) {
       return;
@@ -191,29 +211,6 @@ const EventRow: React.FC<EventRowProps> = ({
     }
   };
 
-  const getDemandStatus = (demand: Demand) => {
-    const today = new Date();
-    const demandDate = new Date(demand.date);
-    const diffDays = Math.ceil((demandDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
-    
-    if (diffDays < 0) return 'overdue';
-    if (diffDays <= 3) return 'current';
-    return 'upcoming';
-  };
-
-  const sortedDemands = [...demands].sort((a, b) => {
-    const statusA = getDemandStatus(a);
-    const statusB = getDemandStatus(b);
-    
-    const statusOrder = { 'overdue': 0, 'current': 1, 'upcoming': 2 };
-    
-    if (statusOrder[statusA] !== statusOrder[statusB]) {
-      return statusOrder[statusA] - statusOrder[statusB];
-    }
-    
-    return a.date.getTime() - b.date.getTime();
-  });
-
   useEffect(() => {
     const handleGlobalMouseUp = () => {
       if (isDragging) {
@@ -262,7 +259,7 @@ const EventRow: React.FC<EventRowProps> = ({
       </button>
 
       <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
-        {/* Event Info Section - Fixed Width for Consistency */}
+        {/* Event Info Section */}
         <div className="flex items-center space-x-3 min-w-0 flex-shrink-0 lg:w-64">
           <div className="flex items-center space-x-1">
             <div className="w-12 h-12 glass-card rounded-lg flex items-center justify-center overflow-hidden">
@@ -328,7 +325,7 @@ const EventRow: React.FC<EventRowProps> = ({
           </button>
         </div>
 
-        {/* Demands Section - Scrollable */}
+        {/* Demands Section */}
         <div className="flex items-center space-x-2 flex-1 min-w-0">
           <button
             onClick={() => scroll('left')}

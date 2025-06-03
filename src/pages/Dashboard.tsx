@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import Header from '@/components/Header';
 import SummaryIndicators from '@/components/SummaryIndicators';
@@ -22,7 +22,8 @@ const Dashboard = () => {
     getActiveEvents,
     getActiveDemands,
     getCompletedDemands,
-    getArchivedEvents
+    getArchivedEvents,
+    lastUpdate
   } = useEventManager();
 
   const [showEventForm, setShowEventForm] = useState(false);
@@ -37,13 +38,14 @@ const Dashboard = () => {
   const completedDemands = getCompletedDemands();
   const archivedEvents = getArchivedEvents();
 
-  console.log('Dashboard - Active events:', activeEvents.length);
-  console.log('Dashboard - Active demands:', activeDemands.length);
-  console.log('Dashboard - Completed demands:', completedDemands.length);
-  console.log('Dashboard - Archived events:', archivedEvents.length);
+  console.log('📊 Dashboard - Última atualização:', new Date(lastUpdate).toLocaleTimeString());
+  console.log('📅 Eventos ativos:', activeEvents.length);
+  console.log('📋 Demandas ativas:', activeDemands.length);
+  console.log('✅ Demandas concluídas:', completedDemands.length);
+  console.log('📁 Eventos arquivados:', archivedEvents.length);
 
   const handleEventSubmit = (data: EventFormData) => {
-    console.log('Dashboard - Submitting event:', data);
+    console.log('📝 Submetendo evento:', data.name);
     
     if (editingEvent) {
       updateEvent(editingEvent.id, {
@@ -72,7 +74,7 @@ const Dashboard = () => {
   };
 
   const handleDemandSubmit = (data: DemandFormData) => {
-    console.log('Dashboard - Submitting demand:', data);
+    console.log('📝 Submetendo demanda:', data.title);
     
     if (editingDemand) {
       updateDemand(editingDemand.id, data);
@@ -96,7 +98,7 @@ const Dashboard = () => {
   };
 
   const handleAddDemand = (eventId: string) => {
-    console.log('Dashboard - Adding demand for event:', eventId);
+    console.log('➕ Adicionando demanda para evento:', eventId);
     setSelectedEventId(eventId);
     setShowDemandForm(true);
   };
@@ -112,7 +114,7 @@ const Dashboard = () => {
   };
 
   const handleArchiveEvent = (id: string) => {
-    console.log('Dashboard - Archiving event:', id);
+    console.log('📁 Arquivando evento:', id);
     updateEvent(id, { isArchived: true });
     toast({
       title: "Evento arquivado",
@@ -121,7 +123,7 @@ const Dashboard = () => {
   };
 
   const handleCompleteDemand = (id: string) => {
-    console.log('Dashboard - Completing demand:', id);
+    console.log('✅ Concluindo demanda:', id);
     updateDemand(id, { isCompleted: true });
     toast({
       title: "Demanda concluída",
@@ -154,7 +156,9 @@ const Dashboard = () => {
       <div className="pt-24">
         <div className="px-4 mt-8">
           <div className="flex items-center justify-between mb-6">
-            <div></div>
+            <div className="text-xs text-blue-200/50">
+              Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+            </div>
             <button
               onClick={() => setShowEventForm(true)}
               className="glass-button px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-500/30 transition-all"

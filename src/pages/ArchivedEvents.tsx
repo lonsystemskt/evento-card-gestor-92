@@ -6,14 +6,15 @@ import { useEventManager } from '@/hooks/useEventManager';
 import { useToast } from '@/hooks/use-toast';
 
 const ArchivedEvents = () => {
-  const { getArchivedEvents, updateEvent, deleteEvent } = useEventManager();
+  const { getArchivedEvents, updateEvent, deleteEvent, lastUpdate } = useEventManager();
   const { toast } = useToast();
   const archivedEvents = getArchivedEvents();
 
-  console.log('ArchivedEvents - Archived events:', archivedEvents.length);
+  console.log('📁 ArchivedEvents - Eventos arquivados:', archivedEvents.length);
+  console.log('📁 ArchivedEvents - Última atualização:', new Date(lastUpdate).toLocaleTimeString());
 
   const handleRestore = (id: string) => {
-    console.log('ArchivedEvents - Restoring event:', id);
+    console.log('🔄 Restaurando evento:', id);
     updateEvent(id, { isArchived: false });
     toast({
       title: "Evento restaurado",
@@ -23,7 +24,7 @@ const ArchivedEvents = () => {
 
   const handlePermanentDelete = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir permanentemente este evento? Esta ação não pode ser desfeita.')) {
-      console.log('ArchivedEvents - Permanently deleting event:', id);
+      console.log('🗑️ Excluindo permanentemente evento:', id);
       deleteEvent(id);
       toast({
         title: "Evento excluído",
@@ -39,7 +40,10 @@ const ArchivedEvents = () => {
       <div className="pt-24 px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Eventos Arquivados</h1>
-          <p className="text-blue-200/70">Gerencie seus eventos arquivados</p>
+          <p className="text-blue-200/70 mb-1">Gerencie seus eventos arquivados</p>
+          <p className="text-xs text-blue-200/50">
+            Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+          </p>
         </div>
 
         {archivedEvents.length === 0 ? (
