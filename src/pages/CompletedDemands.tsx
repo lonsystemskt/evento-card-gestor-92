@@ -14,13 +14,14 @@ const CompletedDemands = () => {
   } = useEventManager();
   
   const { toast } = useToast();
-  const allEvents = getAllEvents(); // Buscar todos os eventos, não apenas os ativos
+  const allEvents = getAllEvents();
   const completedDemands = getCompletedDemands();
 
   console.log('CompletedDemands - All events:', allEvents.length);
   console.log('CompletedDemands - Completed demands:', completedDemands.length);
 
   const handleRestore = (id: string) => {
+    console.log('CompletedDemands - Restoring demand:', id);
     updateDemand(id, { isCompleted: false });
     toast({
       title: "Demanda restaurada",
@@ -30,6 +31,7 @@ const CompletedDemands = () => {
 
   const handlePermanentDelete = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir permanentemente esta demanda? Esta ação não pode ser desfeita.')) {
+      console.log('CompletedDemands - Permanently deleting demand:', id);
       deleteDemand(id);
       toast({
         title: "Demanda excluída",

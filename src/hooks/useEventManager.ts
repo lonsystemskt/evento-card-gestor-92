@@ -49,18 +49,14 @@ export const useEventManager = () => {
 
   // Save events to localStorage whenever events change
   useEffect(() => {
-    if (events.length > 0 || localStorage.getItem('lon-events')) {
-      console.log('Saving events to localStorage:', events);
-      localStorage.setItem('lon-events', JSON.stringify(events));
-    }
+    console.log('Saving events to localStorage:', events);
+    localStorage.setItem('lon-events', JSON.stringify(events));
   }, [events]);
 
   // Save demands to localStorage whenever demands change
   useEffect(() => {
-    if (demands.length > 0 || localStorage.getItem('lon-demands')) {
-      console.log('Saving demands to localStorage:', demands);
-      localStorage.setItem('lon-demands', JSON.stringify(demands));
-    }
+    console.log('Saving demands to localStorage:', demands);
+    localStorage.setItem('lon-demands', JSON.stringify(demands));
   }, [demands]);
 
   const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
@@ -72,21 +68,22 @@ export const useEventManager = () => {
       isArchived: false
     };
     console.log('Adding new event:', newEvent);
-    setEvents(prev => {
-      const updated = [...prev, newEvent];
-      console.log('Updated events:', updated);
-      return updated;
-    });
+    setEvents(prev => [...prev, newEvent]);
     return newEvent;
   };
 
   const updateEvent = (id: string, updates: Partial<Event>) => {
-    console.log('Updating event:', id, updates);
+    console.log('Updating event:', id, 'with updates:', updates);
     setEvents(prev => {
-      const updated = prev.map(event => 
-        event.id === id ? { ...event, ...updates } : event
-      );
-      console.log('Updated events:', updated);
+      const updated = prev.map(event => {
+        if (event.id === id) {
+          const updatedEvent = { ...event, ...updates };
+          console.log('Event updated from:', event, 'to:', updatedEvent);
+          return updatedEvent;
+        }
+        return event;
+      });
+      console.log('All events after update:', updated);
       return updated;
     });
   };
@@ -114,16 +111,8 @@ export const useEventManager = () => {
 
   const deleteEvent = (id: string) => {
     console.log('Deleting event:', id);
-    setEvents(prev => {
-      const updated = prev.filter(event => event.id !== id);
-      console.log('Updated events after delete:', updated);
-      return updated;
-    });
-    setDemands(prev => {
-      const updated = prev.filter(demand => demand.eventId !== id);
-      console.log('Updated demands after event delete:', updated);
-      return updated;
-    });
+    setEvents(prev => prev.filter(event => event.id !== id));
+    setDemands(prev => prev.filter(demand => demand.eventId !== id));
   };
 
   const addDemand = (demandData: Omit<Demand, 'id' | 'createdAt'>) => {
@@ -135,36 +124,40 @@ export const useEventManager = () => {
       isArchived: false
     };
     console.log('Adding new demand:', newDemand);
-    setDemands(prev => {
-      const updated = [...prev, newDemand];
-      console.log('Updated demands:', updated);
-      return updated;
-    });
+    setDemands(prev => [...prev, newDemand]);
     return newDemand;
   };
 
   const updateDemand = (id: string, updates: Partial<Demand>) => {
-    console.log('Updating demand:', id, updates);
+    console.log('Updating demand:', id, 'with updates:', updates);
     setDemands(prev => {
-      const updated = prev.map(demand => 
-        demand.id === id ? { ...demand, ...updates } : demand
-      );
-      console.log('Updated demands:', updated);
+      const updated = prev.map(demand => {
+        if (demand.id === id) {
+          const updatedDemand = { ...demand, ...updates };
+          console.log('Demand updated from:', demand, 'to:', updatedDemand);
+          return updatedDemand;
+        }
+        return demand;
+      });
+      console.log('All demands after update:', updated);
       return updated;
     });
   };
 
   const deleteDemand = (id: string) => {
     console.log('Deleting demand:', id);
-    setDemands(prev => {
-      const updated = prev.filter(demand => demand.id !== id);
-      console.log('Updated demands after delete:', updated);
-      return updated;
-    });
+    setDemands(prev => prev.filter(demand => demand.id !== id));
   };
 
   const getActiveEvents = () => {
-    const activeEvents = events.filter(event => !event.isArchived);
+    console.log('Getting active events - filtering from:', events.length, 'events');
+    const activeEvents = events.filter(event => {
+      const isActive = !event.isArchived;
+      console.log(`Event ${event.id} (${event.name}): isArchived=${event.isArchived}, isActive=${isActive}`);
+      return isActive;
+    });
+    
+    console.log('Active events found:', activeEvents.length);
     
     const priorityEvents = activeEvents
       .filter(event => event.isPriority)
@@ -178,18 +171,26 @@ export const useEventManager = () => {
   };
 
   const getArchivedEvents = () => {
-    console.log('getArchivedEvents - Total events:', events.length);
-    const archived = events.filter(event => event.isArchived === true);
-    console.log('getArchivedEvents - Archived events:', archived.length, archived);
+    console.log('Getting archived events - filtering from:', events.length, 'events');
+    const archived = events.filter(event => {
+      const isArchived = event.isArchived === true;
+      console.log(`Event ${event.id} (${event.name}): isArchived=${event.isArchived}, willShow=${isArchived}`);
+      return isArchived;
+    });
+    console.log('Archived events found:', archived.length);
     return archived;
   };
   
   const getActiveDemands = (eventId?: string) => {
-    const activeDemands = demands.filter(demand => 
-      !demand.isCompleted && 
-      !demand.isArchived && 
-      (eventId ? demand.eventId === eventId : true)
-    );
+    console.log('Getting active demands - filtering from:', demands.length, 'demands');
+    const activeDemands = demands.filter(demand => {
+      const isActive = !demand.isCompleted && !demand.isArchived;
+      const matchesEvent = eventId ? demand.eventId === eventId : true;
+      console.log(`Demand ${demand.id} (${demand.title}): isCompleted=${demand.isCompleted}, isArchived=${demand.isArchived}, isActive=${isActive}, matchesEvent=${matchesEvent}`);
+      return isActive && matchesEvent;
+    });
+
+    console.log('Active demands found:', activeDemands.length);
 
     return activeDemands.sort((a, b) => {
       const getUrgencyScore = (demand: Demand) => {
@@ -213,21 +214,19 @@ export const useEventManager = () => {
   };
     
   const getCompletedDemands = (eventId?: string) => {
-    console.log('getCompletedDemands - Total demands:', demands.length);
-    console.log('getCompletedDemands - All demands:', demands);
-    
+    console.log('Getting completed demands - filtering from:', demands.length, 'demands');
     const completed = demands.filter(demand => {
       const isCompleted = demand.isCompleted === true;
       const isNotArchived = !demand.isArchived;
       const matchesEvent = eventId ? demand.eventId === eventId : true;
       
-      console.log(`Demand ${demand.id}: isCompleted=${isCompleted}, isNotArchived=${isNotArchived}, matchesEvent=${matchesEvent}`);
+      console.log(`Demand ${demand.id} (${demand.title}): isCompleted=${demand.isCompleted}, isArchived=${demand.isArchived}, isCompleted=${isCompleted}, isNotArchived=${isNotArchived}, matchesEvent=${matchesEvent}`);
       
       return isCompleted && isNotArchived && matchesEvent;
     });
     
-    console.log('getCompletedDemands - Completed demands:', completed.length, completed);
-    return completed;
+    console.log('Completed demands found:', completed.length);
+    return completed.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   };
 
   const getAllEvents = () => {
