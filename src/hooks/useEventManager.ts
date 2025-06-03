@@ -6,11 +6,14 @@ import { compareDatesIgnoreTime, getTodayInBrazil } from '@/utils/dateUtils';
 export const useEventManager = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [demands, setDemands] = useState<Demand[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Load data from localStorage on mount
   useEffect(() => {
     const savedEvents = localStorage.getItem('lon-events');
     const savedDemands = localStorage.getItem('lon-demands');
+    
+    console.log('Loading data from localStorage...');
     
     if (savedEvents) {
       try {
@@ -45,19 +48,23 @@ export const useEventManager = () => {
         setDemands([]);
       }
     }
+    
+    setIsLoaded(true);
   }, []);
 
-  // Save events to localStorage whenever events change
+  // Save events to localStorage whenever events change, but only after initial load
   useEffect(() => {
+    if (!isLoaded) return;
     console.log('Saving events to localStorage:', events);
     localStorage.setItem('lon-events', JSON.stringify(events));
-  }, [events]);
+  }, [events, isLoaded]);
 
-  // Save demands to localStorage whenever demands change
+  // Save demands to localStorage whenever demands change, but only after initial load
   useEffect(() => {
+    if (!isLoaded) return;
     console.log('Saving demands to localStorage:', demands);
     localStorage.setItem('lon-demands', JSON.stringify(demands));
-  }, [demands]);
+  }, [demands, isLoaded]);
 
   const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
     const newEvent: Event = {
